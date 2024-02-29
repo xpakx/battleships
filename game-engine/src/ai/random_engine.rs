@@ -26,37 +26,42 @@ impl Engine for RandomEngine {
         let width = board.width;
         let height = board.height;
 
-        for size in ships {
-            let mut head;
-            let mut tail;
-            loop {
+        let mut placed_ships: Vec<Ship> = Vec::new();
+
+        loop {
+            for size in ships.iter() {
                 let x = rng.gen_range(0..width);
                 let y = rng.gen_range(0..height);
 
-                head = Pos {x, y};
-                tail = match rng.gen_ratio(1, 2) {
-                    true => Pos {x: x + size - 1, y},
-                    false => Pos {x, y: y + size - 1},
+                let head = Pos {x, y};
+                let orientation = match rng.gen_ratio(1, 2) {
+                    true => Orientation::Horizontal,
+                    false => Orientation::Vertical,
                 };
-                
-                let on_board = tail.x < width && tail.y < height;
 
-                let overlapping = placed_ships.iter().any(|ship| {
-                    let x_start = if ship.head.x > 0 { ship.head.x - 1 } else { ship.head.x };
-                    let y_start = if ship.head.y > 0 { ship.head.y - 1 } else { ship.head.y };
-                    // TODO
+                placed_ships.push(Ship {
+                    head,
+                    size: size.clone(),
+                    orientation,
                 });
 
-                if !overlapping && on_board {
-                    break;
-                }
             }
-
-            placed_ships.push(Ship {
-                head,
-                tail,
-                size,
+            
+            let test = placed_ships.iter().all(|ship| {
+                match ship.orientation {
+                    Orientation::Horizontal => {
+                        ship.head.y + ship.size - 1 < board.width
+                    },
+                    Orientation::Vertical => {
+                        ship.head.x + ship.size - 1 < board.height
+                    },
+                }
             });
+
+            if test && validator::check_ship_placement(board, &placed_ships) {
+                break;
+            }
+            placed_ships.clear();
         }
 
         placed_ships

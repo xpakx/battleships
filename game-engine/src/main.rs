@@ -11,7 +11,7 @@ use validator::check_ship_placement;
 fn main() {
     let mut engine = RandomEngine::new();
     println!("{}", engine.get_name());
-    let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: true };
+    let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false };
     let ships = engine.place_ships(&board_definition, vec![4, 3, 3, 2, 2, 2, 1, 1, 1, 1]);
     println!("{:?}", ships);
     println!("{:?}", check_ship_placement(&board_definition, &ships));
@@ -61,12 +61,12 @@ fn print_board(ships: Vec<Ship>, board_definition: &BoardDefinition) {
 
     for ship in ships {
         if ship.orientation == Orientation::Horizontal {
-            for x in ship.head.y..=ship.head.y+ship.size {
-                board[ship.head.y][x] = 'X';
+            for y in ship.head.y..ship.head.y+ship.size {
+                board[ship.head.x][y] = 'X';
             }
         } else {
-            for y in ship.head.x..=ship.head.x+ship.size {
-                board[ship.head.x][y] = 'X';
+            for x in ship.head.x..ship.head.x+ship.size {
+                board[x][ship.head.y] = 'X';
             }
         }
     }
