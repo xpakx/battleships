@@ -7,7 +7,7 @@ use ai::Engine;
 fn main() {
     let mut engine = RandomEngine::new();
     println!("{}", engine.get_name());
-    let board_definition = BoardDefinition { width: 10, height: 10 };
+    let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: true };
     let ships = engine.place_ships(&board_definition, vec![4, 3, 3, 2, 2, 2, 1, 1, 1, 1]);
     println!("{:?}", ships);
     print_board(ships, &board_definition);

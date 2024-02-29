@@ -14,6 +14,7 @@ pub struct Ship {
 pub struct BoardDefinition {
     pub width: i32,
     pub height: i32,
+    pub adjacent_ships_allowed: bool,
 }
 
 #[derive(PartialEq)]
