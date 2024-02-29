@@ -1,4 +1,5 @@
 pub mod random_engine;
+pub mod greedy_engine;
 use crate::{BoardDefinition, Ship, Pos, BoardState};
 
 pub trait Engine {

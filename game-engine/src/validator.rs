@@ -1,4 +1,4 @@
-use std::{usize, cmp::{min, max}};
+use std::{usize, cmp::min};
 
 use crate::{BoardDefinition, Ship};
 
