@@ -43,3 +43,54 @@ pub fn check_ship_placement(board: &BoardDefinition, ships: &Vec<Ship>) -> bool 
 
     true
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Pos;
+
+    #[test]
+    fn test_detecting_intersecting_ends() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let ships = vec![
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 1, y: 2}, size: 2},
+            Ship {head: Pos {x: 0, y: 2}, tail: Pos {x: 1, y: 2}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_detecting_intersecting_ships() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let ships = vec![
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 1, y: 3}, size: 3},
+            Ship {head: Pos {x: 0, y: 2}, tail: Pos {x: 2, y: 2}, size: 3},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_detecting_duplicated_ships() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let ships = vec![
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 1, y: 2}, size: 2},
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 1, y: 2}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_accepting_correct_placement() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let ships = vec![
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 1, y: 2}, size: 2},
+            Ship {head: Pos {x: 2, y: 2}, tail: Pos {x: 2, y: 3}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(result);
+    }
+}
