@@ -17,12 +17,13 @@ fn main() {
     let shot = engine.get_shot(
         &BoardState { 
             board: vec![
-                vec![Field::Empty, Field::Hit, Field::Empty, Field::Drown], 
+                vec![Field::Empty, Field::Hit, Field::Empty, Field::Sunk], 
                 vec![Field::Empty, Field::Empty, Field::Empty, Field::Miss], 
                 vec![Field::Empty, Field::Empty, Field::Empty, Field::Empty], 
                 vec![Field::Empty, Field::Empty, Field::Empty, Field::Empty], 
             ], 
-            remaining_ships: vec![1, 1, 2]
+            remaining_ships: vec![1, 1, 2],
+            definition: board_definition,
         }
         );
     println!("{}, {}", shot.x, shot.y);
