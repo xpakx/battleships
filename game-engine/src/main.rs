@@ -1,4 +1,6 @@
 use rand::prelude::*;
+mod data;
+use data::*;
 
 fn main() {
     let mut engine = RandomEngine::new();
@@ -19,43 +21,6 @@ fn main() {
         }
         );
     println!("{}, {}", shot.x, shot.y);
-}
-
-#[derive(Clone, Copy, Debug)]
-struct Pos {
-    x: i32,
-    y: i32,
-}
-
-#[derive(Debug)]
-struct Ship {
-    head: Pos,
-    tail: Pos,
-    size: i32,
-}
-
-struct BoardDefinition {
-    width: i32,
-    height: i32,
-}
-
-#[derive(PartialEq)]
-enum Field {
-    Empty,
-    Hit,
-    Drown,
-    Miss,
-}
-
-struct BoardState {
-    board: Vec<Vec<Field>>,
-    remaining_ships: Vec<i32>,
-}
-
-trait Engine {
-    fn get_name(&self) -> String;
-    fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<i32>) -> Vec<Ship>;
-    fn get_shot(&mut self, board: &BoardState) -> Pos;
 }
 
 
