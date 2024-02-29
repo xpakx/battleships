@@ -1,5 +1,6 @@
 use rand::prelude::*;
-use crate::{BoardDefinition, Ship, Pos, Field, BoardState};
+use crate::data::Orientation;
+use crate::{BoardDefinition, Ship, Pos, Field, BoardState, validator};
 use crate::ai::Engine;
 
 pub struct RandomEngine {
@@ -19,8 +20,7 @@ impl Engine for RandomEngine {
         String::from("Random Engine")
     }
 
-    fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<i32>) -> Vec<Ship> {
-        let mut placed_ships: Vec<Ship> = Vec::new();
+    fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<usize>) -> Vec<Ship> {
         let mut rng = thread_rng();
 
         let width = board.width;
@@ -44,11 +44,7 @@ impl Engine for RandomEngine {
                 let overlapping = placed_ships.iter().any(|ship| {
                     let x_start = if ship.head.x > 0 { ship.head.x - 1 } else { ship.head.x };
                     let y_start = if ship.head.y > 0 { ship.head.y - 1 } else { ship.head.y };
-                    let x_end = if ship.tail.x + 1 < width { ship.tail.x + 1 } else { ship.tail.x };
-                    let y_end = if ship.tail.y + 1 < height { ship.tail.y + 1 } else { ship.tail.y };
-
                     // TODO
-                    (x_start..=x_end).contains(&x) && (y_start..=y_end).contains(&y)
                 });
 
                 if !overlapping && on_board {
@@ -72,13 +68,13 @@ impl Engine for RandomEngine {
         for (x, row) in board.board.iter().enumerate() {
             for (y, field) in row.iter().enumerate() {
                 if field == &Field::Empty {
-                    empty_positions.push(Pos {x: x as i32, y: y as i32});
+                    empty_positions.push(Pos {x, y});
                 }
             }
         }
 
         if empty_positions.is_empty() {
-            return Pos { x: -1, y: -1 };
+            return Pos { x: 0, y: 0 };
         }
         let index = self.rng.gen_range(0..empty_positions.len());
         empty_positions[index]

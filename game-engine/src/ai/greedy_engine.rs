@@ -20,7 +20,7 @@ impl Engine for GreedyEngine {
         String::from("Greedy Engine")
     }
 
-    fn place_ships(&mut self, _board: &BoardDefinition, _ships: Vec<i32>) -> Vec<Ship> {
+    fn place_ships(&mut self, _board: &BoardDefinition, _ships: Vec<usize>) -> Vec<Ship> {
         vec![]
     }
 
@@ -31,7 +31,7 @@ impl Engine for GreedyEngine {
         for (x, row) in board.board.iter().enumerate() {
             for (y, field) in row.iter().enumerate() {
                 if field == &Field::Hit {
-                    hit_positions.push(Pos {x: x as i32, y: y as i32});
+                    hit_positions.push(Pos {x, y});
                 }
             }
         }
@@ -63,7 +63,7 @@ impl Engine for GreedyEngine {
         for (x, row) in board.board.iter().enumerate() {
             for (y, field) in row.iter().enumerate() {
                 if field == &Field::Empty {
-                    empty_positions.push(Pos {x: x as i32, y: y as i32});
+                    empty_positions.push(Pos {x, y});
                 }
             }
         }

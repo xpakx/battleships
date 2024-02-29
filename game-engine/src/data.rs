@@ -1,19 +1,19 @@
 #[derive(Clone, Copy, Debug)]
 pub struct Pos {
-    pub x: i32,
-    pub y: i32,
+    pub x: usize,
+    pub y: usize,
 }
 
 #[derive(Debug)]
 pub struct Ship {
     pub head: Pos,
-    pub tail: Pos,
-    pub size: i32,
+    pub size: usize,
+    pub orientation: Orientation,
 }
 
 pub struct BoardDefinition {
-    pub width: i32,
-    pub height: i32,
+    pub width: usize,
+    pub height: usize,
     pub adjacent_ships_allowed: bool,
 }
 
@@ -27,6 +27,12 @@ pub enum Field {
 
 pub struct BoardState {
     pub board: Vec<Vec<Field>>,
-    pub remaining_ships: Vec<i32>,
+    pub remaining_ships: Vec<usize>,
     pub definition: BoardDefinition,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Orientation {
+    Horizontal,
+    Vertical,
 }

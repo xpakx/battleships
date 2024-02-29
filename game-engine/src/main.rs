@@ -60,9 +60,13 @@ fn print_board(ships: Vec<Ship>, board_definition: &BoardDefinition) {
     let mut board = vec![vec!['.'; width]; height];
 
     for ship in ships {
-        for x in ship.head.x..=ship.tail.x {
-            for y in ship.head.y..=ship.tail.y {
-                board[y as usize][x as usize] = 'X';
+        if ship.orientation == Orientation::Horizontal {
+            for x in ship.head.y..=ship.head.y+ship.size {
+                board[ship.head.y][x] = 'X';
+            }
+        } else {
+            for y in ship.head.x..=ship.head.x+ship.size {
+                board[ship.head.x][y] = 'X';
             }
         }
     }
