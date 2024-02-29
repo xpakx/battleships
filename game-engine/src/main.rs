@@ -1,8 +1,10 @@
 mod data;
 mod ai;
+mod validator;
 use data::*;
 use ai::random_engine::*;
 use ai::Engine;
+use validator::check_ship_placement;
 
 fn main() {
     let mut engine = RandomEngine::new();
@@ -10,6 +12,7 @@ fn main() {
     let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: true };
     let ships = engine.place_ships(&board_definition, vec![4, 3, 3, 2, 2, 2, 1, 1, 1, 1]);
     println!("{:?}", ships);
+    println!("{:?}", check_ship_placement(&board_definition, &ships));
     print_board(ships, &board_definition);
     let shot = engine.get_shot(
         &BoardState { 
