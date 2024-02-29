@@ -176,4 +176,48 @@ mod tests {
         let result = check_ship_placement(&board, &ships);
         assert!(result);
     }
+
+    #[test]
+    fn test_detecting_adjacent_ships() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let ships = vec![
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 1, y: 2}, size: 2},
+            Ship {head: Pos {x: 1, y: 3}, tail: Pos {x: 2, y: 3}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_detecting_adjacent_ships_2() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let ships = vec![
+            Ship {head: Pos {x: 0, y: 0}, tail: Pos {x: 0, y: 1}, size: 2},
+            Ship {head: Pos {x: 1, y: 1}, tail: Pos {x: 2, y: 1}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_detecting_adjacent_ships_corner() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let ships = vec![
+            Ship {head: Pos {x: 0, y: 0}, tail: Pos {x: 0, y: 1}, size: 2},
+            Ship {head: Pos {x: 1, y: 2}, tail: Pos {x: 2, y: 2}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_accepting_correct_placement_without_adjacent_ships() {
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let ships = vec![
+            Ship {head: Pos {x: 0, y: 0}, tail: Pos {x: 0, y: 1}, size: 2},
+            Ship {head: Pos {x: 3, y: 0}, tail: Pos {x: 3, y: 1}, size: 2},
+        ];
+        let result = check_ship_placement(&board, &ships);
+        assert!(result);
+    }
 }
