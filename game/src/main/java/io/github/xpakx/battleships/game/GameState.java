@@ -77,5 +77,10 @@ public class GameState implements Serializable {
         var winner = getCurrentPlayer();
         return Optional.of(winner != null ? winner : "AI");
     }
+
+    public boolean isGameStarted() {
+        return !userShips.isEmpty() && !opponentShips.isEmpty();
+
+    }
 }
 

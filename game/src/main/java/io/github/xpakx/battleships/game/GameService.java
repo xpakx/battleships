@@ -26,7 +26,11 @@ public class GameService {
             return msg;
         }
         var game = gameOpt.get();
-        // TODO: check if ship placement is ready
+        if (!game.isGameStarted()) {
+            var msg = MoveMessage.rejected(move.getX(), move.getY(), username, "Game not started, both players must place their ships!");
+            simpMessagingTemplate.convertAndSend("/topic/game/" + gameId, msg);
+            return msg;
+        }
         if (game.isFinished()) {
             var msg =  MoveMessage.rejected(move.getX(), move.getY(), username, "Game is finished!");
             simpMessagingTemplate.convertAndSend("/topic/game/" + gameId, msg);
