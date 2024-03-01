@@ -9,6 +9,7 @@ import io.github.xpakx.battleships.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -31,10 +32,15 @@ public class GameService {
     private Game newGameAgainstUser(String username, String opponent) {
         var newGame = new Game();
         newGame.setUser(userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
-        newGame.setUserCurrentState("?????????");
-        newGame.setOpponentCurrentState("?????????");
-        newGame.setType(GameType.USER);
         newGame.setOpponent(userRepository.findByUsername(opponent).orElseThrow(UserNotFoundException::new));
+        newGame.setType(GameType.USER);
+        newGame.setRuleset(GameRuleset.CLASSIC);
+        newGame.setAiType(AIType.NONE);
+        var emptyState = createEmptyGameState(10, 10);
+        newGame.setUserCurrentState(emptyState);
+        newGame.setOpponentCurrentState(emptyState);
+        newGame.setUserShips("[]");
+        newGame.setOpponentShips("[]");
         Random random = new Random();
         newGame.setUserStarts(random.nextBoolean());
         newGame.setUserTurn(newGame.isUserStarts());
@@ -44,14 +50,23 @@ public class GameService {
     private Game newGameAgainstAI(String username) {
         var newGame = new Game();
         newGame.setUser(userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
-        newGame.setUserCurrentState("?????????");
-        newGame.setOpponentCurrentState("?????????");
         newGame.setType(GameType.AI);
+        newGame.setRuleset(GameRuleset.CLASSIC);
+        newGame.setAiType(AIType.RANDOM);
+        var emptyState = createEmptyGameState(10, 10);
+        newGame.setUserCurrentState(emptyState);
+        newGame.setOpponentCurrentState(emptyState);
+        newGame.setUserShips("[]");
+        newGame.setOpponentShips("[]");
         newGame.setAccepted(true);
         Random random = new Random();
         newGame.setUserStarts(random.nextBoolean());
         newGame.setUserTurn(newGame.isUserStarts());
         return gameRepository.save(newGame);
+    }
+
+    private String createEmptyGameState(int width, int height) {
+        return "?".repeat(width * height);
     }
 
     public List<GameSummary> getRequests(String username) {
@@ -94,6 +109,7 @@ public class GameService {
         }
         if (decision.isAccepted()) {
             game.setAccepted(true);
+            game.setStartedAt(LocalDateTime.now());
         } else {
             game.setRejected(true);
         }
