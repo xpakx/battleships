@@ -37,10 +37,10 @@ public class MovePublisher {
         template.convertAndSend(movesTopic, "ai", event);
     }
 
-    public void sendPlacement(Long gameId, String username, String ships) {
+    public void sendPlacement(Long gameId, boolean firstUser, String ships) {
         var event = new PlacementEvent();
         event.setGameId(gameId);
-        event.setUsername(username);
+        event.setFirstUser(firstUser);
         event.setShips(ships);
         template.convertAndSend(movesTopic, "placement", event);
     }

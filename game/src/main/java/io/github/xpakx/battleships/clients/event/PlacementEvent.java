@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class PlacementEvent {
     private Long gameId;
-    private String username;
+    private boolean firstUser;
     private String ships;
     // ruleset
 }
