@@ -2,7 +2,7 @@ package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.clients.MovePublisher;
 import io.github.xpakx.battleships.game.dto.EngineAIMoveEvent;
-import io.github.xpakx.battleships.game.dto.EngineAIPlacementEvent;
+import io.github.xpakx.battleships.game.dto.EnginePlacementEvent;
 import io.github.xpakx.battleships.game.dto.EngineMoveEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -32,11 +32,10 @@ public class EngineEventHandler {
         }
     }
 
-    @RabbitListener(queues = "${amqp.queue.ai.placement}")
-    void handleAIPlacement(final EngineAIPlacementEvent event) {
+    @RabbitListener(queues = "${amqp.queue.placement}")
+    void handleAIPlacement(final EnginePlacementEvent event) {
         try {
-            // TODO
-            publisher.sendPlacement(event.getGameId(), "AI", event.getShips());
+            service.doPlaceShips(event);
         } catch (final Exception e) {
             throw new AmqpRejectAndDontRequeueException(e);
         }

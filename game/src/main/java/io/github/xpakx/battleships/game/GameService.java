@@ -163,4 +163,21 @@ public class GameService {
             movePublisher.sendAIEvent(game, Phase.Move);
         }
     }
+
+    public void doPlaceShips(EnginePlacementEvent event) {
+        var game = getGameById(event.getGameId()).orElseThrow();
+        if (!event.isLegal()) {
+            return;
+        }
+        if (event.isFirstUser()) {
+            game.setUserShips(event.getShips());
+        } else {
+            game.setOpponentShips(event.getShips());
+        }
+        repository.save(game);
+
+        if (game.isGameStarted() && game.aiTurn()) {
+            movePublisher.sendAIEvent(game, Phase.Move);
+        }
+    }
 }

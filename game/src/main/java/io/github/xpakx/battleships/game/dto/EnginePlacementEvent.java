@@ -5,7 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class EngineAIPlacementEvent {
+public class EnginePlacementEvent {
     private Long gameId;
     private String ships;
+    private boolean firstUser;
+    private boolean legal;
 }
