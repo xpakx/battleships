@@ -2,9 +2,9 @@ package io.github.xpakx.battleships.clients;
 
 import io.github.xpakx.battleships.clients.event.AIEvent;
 import io.github.xpakx.battleships.clients.event.MoveEvent;
+import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.clients.event.PlacementEvent;
 import io.github.xpakx.battleships.game.GameState;
-import io.github.xpakx.battleships.game.dto.MoveMessage;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,10 +29,11 @@ public class MovePublisher {
         template.convertAndSend(movesTopic, "move", event);
     }
 
-    public void sendAIEvent(GameState game) {
+    public void sendAIEvent(GameState game, Phase phase) {
         var event = new AIEvent();
         event.setGameId(game.getId());
         event.setGameState(game.getCurrentState());
+        event.setPhase(phase);
         template.convertAndSend(movesTopic, "ai", event);
     }
 

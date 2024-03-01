@@ -2,6 +2,8 @@ package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.clients.GamePublisher;
 import io.github.xpakx.battleships.clients.MovePublisher;
+import io.github.xpakx.battleships.clients.event.AIEvent;
+import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.game.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -108,10 +110,10 @@ public class GameService {
         repository.save(game);
         var msg = GameMessage.of(game);
         simpMessagingTemplate.convertAndSend("/topic/board/" + game.getId(), msg);
-        if (game.aiTurn() && game.isGameStarted()) {
-            movePublisher.sendAIEvent(game);
+        if (game.aiTurn() && msg.isGameStarted()) {
+            movePublisher.sendAIEvent(game, Phase.Move);
+        } else if (!msg.isGameStarted()) {
+            movePublisher.sendAIEvent(game, Phase.Placement);
         }
-        // TODO: in case game not started
-
     }
 }

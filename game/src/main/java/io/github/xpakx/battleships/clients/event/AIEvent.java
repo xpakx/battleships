@@ -8,7 +8,8 @@ import lombok.Setter;
 public class AIEvent {
     private Long gameId;
     private String gameState;
+    private Phase phase;
     // TODO ruleset
     // TODO ai type
-    // TODO move/placement
+
 }

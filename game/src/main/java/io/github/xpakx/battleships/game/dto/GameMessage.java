@@ -14,11 +14,13 @@ public class GameMessage {
     private String username2;
     private boolean ai;
 
-    private String[][] state1; // TODO
-    private String[][] state2; // TODO
+    private String[][] state1;
+    private String[][] state2;
+    // TODO
     // private Integer lastMoveX;
     // private Integer lastMoveY;
     private String currentPlayer;
+    private boolean gameStarted;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String error;
@@ -31,7 +33,7 @@ public class GameMessage {
         msg.setState1(stringToBoard(game.getUserCurrentState()));
         msg.setState2(stringToBoard(game.getOpponentCurrentState()));
         msg.setCurrentPlayer(game.isFirstUserTurn() ? game.getUsername1() : game.getUsername2());
-        // TODO placement phase?
+        msg.setGameStarted(game.isGameStarted());
         return msg;
     }
 
