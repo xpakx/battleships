@@ -116,4 +116,23 @@ public class GameService {
         gameRepository.save(game);
         return decision.isAccepted();
     }
+
+    public void updateGame(Game game, UpdateEvent event) {
+        game.setLastMoveAt(LocalDateTime.now());
+
+        game.setFinished(event.isFinished());
+        game.setWon(event.isWon());
+        game.setLost(event.isLost());
+        game.setDrawn(event.isDrawn());
+
+        game.setUserCurrentState(event.getUserCurrentState());
+        game.setOpponentCurrentState(event.getOpponentCurrentState());
+        game.setUserShips(event.getUserShips());
+        game.setOpponentShips(event.getOpponentShips());
+
+        game.setUserTurn(event.isUserTurn());
+        gameRepository.save(game);
+
+        // TODO save move history
+    }
 }
