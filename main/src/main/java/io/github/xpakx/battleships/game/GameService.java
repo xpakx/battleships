@@ -75,7 +75,7 @@ public class GameService {
                         .orElseThrow(UserNotFoundException::new)
                         .getId()
                 ).stream()
-                .map(GameSummary::of).toList();
+                .map((a) -> GameSummary.of(a, username)).toList();
     }
 
     public List<GameSummary> getActiveGames(String username) {
@@ -84,7 +84,7 @@ public class GameService {
                         .orElseThrow(UserNotFoundException::new)
                         .getId()
                 ).stream()
-                .map(GameSummary::of).toList();
+                .map((a) -> GameSummary.of(a, username)).toList();
     }
 
     public List<GameSummary> getOldGames(String username) {
@@ -93,7 +93,7 @@ public class GameService {
                         .orElseThrow(UserNotFoundException::new)
                         .getId()
                 ).stream()
-                .map(GameSummary::of).toList();
+                .map((a) -> GameSummary.of(a, username)).toList();
     }
 
     public boolean acceptRequest(String username, Long requestId, AcceptRequest decision) {
