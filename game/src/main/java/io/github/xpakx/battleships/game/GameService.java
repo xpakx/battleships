@@ -2,7 +2,6 @@ package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.clients.GamePublisher;
 import io.github.xpakx.battleships.clients.MovePublisher;
-import io.github.xpakx.battleships.clients.event.AIEvent;
 import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.game.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -114,6 +113,50 @@ public class GameService {
             movePublisher.sendAIEvent(game, Phase.Move);
         } else if (!msg.isGameStarted()) {
             movePublisher.sendAIEvent(game, Phase.Placement);
+        }
+    }
+
+    public void doMakeMove(EngineMoveEvent event) {
+        var game = getGameById(event.getGameId()).orElseThrow();
+        if (!event.isLegal()) {
+            game.setBlocked(false);
+            simpMessagingTemplate.convertAndSend(
+                    "/topic/game/" + game.getId(),
+                    MoveMessage.rejected(
+                            event.getRow(),
+                            event.getColumn(),
+                            game.getCurrentPlayer(),
+                            "Move is illegal!"
+                    )
+            );
+            repository.save(game);
+            return;
+        }
+
+        game.changeState(event.getNewState());
+        if (event.isFinished()) {
+            game.setFinished(true);
+            if (game.isFirstUserTurn()) {
+                game.setWon(true);
+            } else {
+                game.setLost(true);
+            }
+        }
+        var msg = MoveMessage.of(event.getRow(), event.getColumn(), game.getCurrentPlayer(), event.getResult());
+        if (game.isFinished()) {
+            msg.setFinished(true);
+            msg.setWon(game.isWon());
+            msg.setWinner(game.getWinner().orElse(null));
+            repository.deleteById(game.getId());
+        } else {
+            game.nextPlayer();
+            game.setBlocked(false);
+            repository.save(game);
+        }
+
+        simpMessagingTemplate.convertAndSend("/topic/game/" + game.getId(), msg);
+        if (!game.isFinished() && game.aiTurn()) {
+            movePublisher.sendAIEvent(game, Phase.Move);
         }
     }
 }

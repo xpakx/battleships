@@ -82,5 +82,13 @@ public class GameState implements Serializable {
         return !userShips.isEmpty() && !opponentShips.isEmpty();
 
     }
+
+    public void changeState(String newState) {
+        if (isFirstUserTurn()) {
+            userCurrentState = newState;
+        } else {
+            opponentCurrentState = newState;
+        }
+    }
 }
 
