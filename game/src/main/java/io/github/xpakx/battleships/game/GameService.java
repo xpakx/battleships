@@ -1,5 +1,6 @@
 package io.github.xpakx.battleships.game;
 
+import io.github.xpakx.battleships.clients.GamePublisher;
 import io.github.xpakx.battleships.game.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -12,11 +13,12 @@ import java.util.Optional;
 public class GameService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final GameRepository repository;
+    private final GamePublisher gamePublisher;
 
     public MoveMessage move(Long gameId, MoveRequest move, String username) {
         var gameOpt = getGameById(gameId);
         if (gameOpt.isEmpty()) {
-            // TODO ask main service for game
+            gamePublisher.getGame(gameId);
             var msg = MoveMessage.rejected(move.getX(), move.getY(), username, "Game not loaded, please wait!");
             simpMessagingTemplate.convertAndSend("/topic/game/" + gameId, msg);
             return msg;
@@ -56,7 +58,7 @@ public class GameService {
     public GameMessage subscribe(Long gameId) {
         var gameOpt = getGameById(gameId);
         if (gameOpt.isEmpty()) {
-            // TODO ask main service for game
+            gamePublisher.getGame(gameId);
             var msg = new GameMessage();
             msg.setError("Loading game, please wait…");
             return msg;
