@@ -14,6 +14,7 @@ public class GameState implements Serializable {
     private Long id;
     private boolean finished;
     private boolean won;
+    private boolean lost;
     private boolean drawn;
     private String userCurrentState;
     private String opponentCurrentState;
@@ -49,6 +50,20 @@ public class GameState implements Serializable {
             return username1;
         }
         return username2;
+    }
+
+    public String getCurrentTargets() {
+        if (isFirstUserTurn()) {
+            return opponentShips;
+        }
+        return userShips;
+    }
+
+    public String getCurrentState() {
+        if (isFirstUserTurn()) {
+            return opponentCurrentState;
+        }
+        return userCurrentState;
     }
 
     public boolean aiTurn() {

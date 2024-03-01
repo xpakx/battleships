@@ -1,6 +1,7 @@
 package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.clients.GamePublisher;
+import io.github.xpakx.battleships.clients.MovePublisher;
 import io.github.xpakx.battleships.game.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -13,6 +14,7 @@ import java.util.Optional;
 public class GameService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final GameRepository repository;
+    private final MovePublisher movePublisher;
     private final GamePublisher gamePublisher;
 
     public MoveMessage move(Long gameId, MoveRequest move, String username) {
@@ -38,11 +40,16 @@ public class GameService {
         }
         game.setBlocked(true);
         repository.save(game);
-        var msg = MoveMessage.of(move.getX(), move.getY(), username, null);
 
-        // TODO publish
+        movePublisher.sendHit(
+                move.getX(),
+                move.getY(),
+                game.getCurrentState(),
+                game.getCurrentTargets(),
+                game.getId()
+        );
 
-        return msg;
+        return MoveMessage.of(move.getX(), move.getY(), username, null);
     }
 
     public Optional<GameState> getGameById(Long id) {
