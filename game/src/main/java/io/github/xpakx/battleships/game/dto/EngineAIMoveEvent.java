@@ -5,13 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class EngineMoveEvent {
+public class EngineAIMoveEvent {
     Long gameId;
-    boolean legal;
     Integer row;
     Integer column;
-    boolean finished;
-    boolean ai;
-    MoveResult result;
-    String newState;
 }

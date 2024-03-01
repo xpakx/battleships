@@ -130,6 +130,10 @@ public class GameService {
                     )
             );
             repository.save(game);
+            if (event.isAi()) {
+                // TODO theoretically that shouldn't happen
+                movePublisher.sendAIEvent(game, Phase.Move);
+            }
             return;
         }
 
