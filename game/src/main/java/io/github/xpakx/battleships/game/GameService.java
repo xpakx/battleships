@@ -77,4 +77,41 @@ public class GameService {
         var game = gameOpt.get();
         return GameMessage.of(game);
     }
+
+    public void loadGame(StateEvent event) {
+        if (event.isError()) {
+            var msg = new GameMessage();
+            msg.setError(event.getErrorMessage());
+            simpMessagingTemplate.convertAndSend("/topic/board/" + event.getId(), msg);
+            return;
+        }
+        if (event.isFinished()) {
+            var msg = new GameMessage();
+            msg.setError("Game is already finished!");
+            simpMessagingTemplate.convertAndSend("/topic/board/" + event.getId(), msg);
+            return;
+        }
+
+        var game = new GameState();
+        game.setId(event.getId());
+        game.setUsername1(event.getUsername1());
+        game.setUsername2(event.getUsername2());
+        game.setUser2AI(event.isUser2AI());
+
+        game.setFirstUserStarts(event.isFirstUserStarts());
+        game.setFirstUserTurn(event.isFirstUserTurn());
+
+        game.setUserCurrentState(event.getUserCurrentState());
+        game.setUserShips(event.getUserShips());
+        game.setOpponentCurrentState(event.getOpponentCurrentState());
+        game.setOpponentShips(event.getOpponentShips());
+        repository.save(game);
+        var msg = GameMessage.of(game);
+        simpMessagingTemplate.convertAndSend("/topic/board/" + game.getId(), msg);
+        if (game.aiTurn() && game.isGameStarted()) {
+            movePublisher.sendAIEvent(game);
+        }
+        // TODO: in case game not started
+
+    }
 }
