@@ -63,15 +63,53 @@ public class AMQPConfig {
     }
 
     @Bean
-    public Queue engineQueue(@Value("${amqp.queue.engine}") final String queueName) {
+    public Queue aiMovesQueue(@Value("${amqp.queue.ai.moves}") final String queueName) {
         return QueueBuilder.durable(queueName).build();
     }
 
     @Bean
-    public Binding engineBinding(final Queue engineQueue, final TopicExchange engineTopicExchange) {
-        return BindingBuilder.bind(engineQueue)
+    public Binding aiMovesBinding(final Queue aiMovesQueue, final TopicExchange engineTopicExchange) {
+        return BindingBuilder.bind(aiMovesQueue)
                 .to(engineTopicExchange)
-                .with("engine");
+                .with("ai.move");
+    }
+
+    @Bean
+    public Queue aiPlacementQueue(@Value("${amqp.queue.ai.placement}") final String queueName) {
+        return QueueBuilder.durable(queueName).build();
+    }
+
+    @Bean
+    public Binding aiPlacementBinding(final Queue aiPlacementQueue, final TopicExchange engineTopicExchange) {
+        return BindingBuilder.bind(aiPlacementQueue)
+                .to(engineTopicExchange)
+                .with("ai.placement");
+    }
+    //
+
+
+    @Bean
+    public Queue validationMovesQueue(@Value("${amqp.queue.validation.moves}") final String queueName) {
+        return QueueBuilder.durable(queueName).build();
+    }
+
+    @Bean
+    public Binding validationMovesBinding(final Queue validationMovesQueue, final TopicExchange engineTopicExchange) {
+        return BindingBuilder.bind(validationMovesQueue)
+                .to(engineTopicExchange)
+                .with("validation.move");
+    }
+
+    @Bean
+    public Queue validationPlacementQueue(@Value("${amqp.queue.validation.placement}") final String queueName) {
+        return QueueBuilder.durable(queueName).build();
+    }
+
+    @Bean
+    public Binding validationPlacementBinding(final Queue validationPlacementQueue, final TopicExchange engineTopicExchange) {
+        return BindingBuilder.bind(validationPlacementQueue)
+                .to(engineTopicExchange)
+                .with("validation.placement");
     }
 
     @Bean
