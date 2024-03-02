@@ -19,7 +19,7 @@ fn main() {
     println!("{:?}", check_ship_placement(&board_definition, &ships));
     println!("{:?}", check_ships_are_on_board(&board_definition, &ships));
     println!("{:?}", check_all_ships_are_placed(&ships, sizes.clone()));
-    print_board(ships, &board_definition);
+    print_board(ships.clone(), &board_definition);
     let shot = engine.get_shot(
         &BoardState { 
             board: vec![
@@ -33,6 +33,8 @@ fn main() {
         }
         );
     println!("{}, {}", shot.x, shot.y);
+    let result = hit_result(&ships, &shot);
+    println!("{:?}", result);
 
 
     let mut engine = GreedyEngine::new();
@@ -78,4 +80,30 @@ fn print_board(ships: Vec<Ship>, board_definition: &BoardDefinition) {
     for row in board.iter() {
         println!("{}", row.iter().collect::<String>());
     }
+}
+
+#[derive(Debug)]
+pub enum HitResult {
+    Hit(Ship),
+    Miss,
+}
+
+pub fn hit_result(ships: &Vec<Ship>, pos: &Pos) -> HitResult {
+    for ship in ships {
+        let mut ship_positions = Vec::new();
+        for i in 0..ship.size {
+            match ship.orientation {
+                Orientation::Horizontal => {
+                    ship_positions.push(Pos { x: ship.head.x, y: ship.head.y + i });
+                }
+                Orientation::Vertical => {
+                    ship_positions.push(Pos { x: ship.head.x + i, y: ship.head.y });
+                }
+            }
+        }
+        if ship_positions.contains(pos) {
+            return HitResult::Hit(*ship);
+        }
+    }
+    HitResult::Miss
 }

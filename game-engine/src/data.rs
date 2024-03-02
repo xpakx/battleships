@@ -1,10 +1,10 @@
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Pos {
     pub x: usize,
     pub y: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Ship {
     pub head: Pos,
     pub size: usize,
@@ -31,7 +31,7 @@ pub struct BoardState {
     pub definition: BoardDefinition,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Orientation {
     Horizontal,
     Vertical,
