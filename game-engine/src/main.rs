@@ -6,16 +6,19 @@ use ai::random_engine::*;
 use ai::greedy_engine::*;
 use ai::Engine;
 use validator::check_ship_placement;
+use crate::validator::check_all_ships_are_placed;
 use crate::validator::check_ships_are_on_board;
 
 fn main() {
     let mut engine = RandomEngine::new();
     println!("{}", engine.get_name());
     let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false };
-    let ships = engine.place_ships(&board_definition, vec![4, 3, 3, 2, 2, 2, 1, 1, 1, 1]);
+    let sizes = vec![4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+    let ships = engine.place_ships(&board_definition, sizes.clone());
     println!("{:?}", ships);
     println!("{:?}", check_ship_placement(&board_definition, &ships));
     println!("{:?}", check_ships_are_on_board(&board_definition, &ships));
+    println!("{:?}", check_all_ships_are_placed(&ships, sizes.clone()));
     print_board(ships, &board_definition);
     let shot = engine.get_shot(
         &BoardState { 

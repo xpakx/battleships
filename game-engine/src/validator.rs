@@ -91,6 +91,14 @@ pub fn check_ships_are_on_board(board: &BoardDefinition, ships: &Vec<Ship>) -> b
     })
 }
 
+pub fn check_all_ships_are_placed(ships: &Vec<Ship>, sizes: Vec<usize>) -> bool {
+    let mut ship_sizes: Vec<usize> = ships.iter()
+        .map(|ship| ship.size)
+        .collect();
+    ship_sizes.sort();
+    ship_sizes.eq(&sizes)
+}
+
 fn get_prev_coord(orientation: &Orientation, x: usize, y: usize) -> (usize, usize) {
     let x_1 = match orientation {
         Orientation::Vertical => x,
