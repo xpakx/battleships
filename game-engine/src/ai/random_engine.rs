@@ -46,19 +46,8 @@ impl Engine for RandomEngine {
                 });
 
             }
-            
-            let test = placed_ships.iter().all(|ship| {
-                match ship.orientation {
-                    Orientation::Horizontal => {
-                        ship.head.y + ship.size - 1 < board.width
-                    },
-                    Orientation::Vertical => {
-                        ship.head.x + ship.size - 1 < board.height
-                    },
-                }
-            });
 
-            if test && validator::check_ship_placement(board, &placed_ships) {
+            if validator::check_ships_are_on_board(board, &placed_ships) && validator::check_ship_placement(board, &placed_ships) {
                 break;
             }
             placed_ships.clear();

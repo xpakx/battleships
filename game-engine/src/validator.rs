@@ -78,6 +78,19 @@ pub fn check_ship_placement(board: &BoardDefinition, ships: &Vec<Ship>) -> bool 
     true
 }
 
+pub fn check_ships_are_on_board(board: &BoardDefinition, ships: &Vec<Ship>) -> bool {
+    ships.iter().all(|ship| {
+        match ship.orientation {
+            Orientation::Horizontal => {
+                ship.head.y + ship.size - 1 < board.width
+            },
+            Orientation::Vertical => {
+                ship.head.x + ship.size - 1 < board.height
+            },
+        }
+    })
+}
+
 fn get_prev_coord(orientation: &Orientation, x: usize, y: usize) -> (usize, usize) {
     let x_1 = match orientation {
         Orientation::Vertical => x,
