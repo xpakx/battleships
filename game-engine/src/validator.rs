@@ -255,4 +255,35 @@ mod tests {
         ];
         assert!(!check_ships_are_on_board(&board, &ships));
     }
+
+    #[test]
+    fn test_check_all_ships_are_placed() {
+        let ships = vec![
+            Ship { head: Pos { x: 1, y: 1 }, size: 2, orientation: Orientation::Horizontal },
+            Ship { head: Pos { x: 0, y: 2 }, size: 2, orientation: Orientation::Vertical },
+        ];
+        let sizes = vec![2, 2];
+        assert!(check_all_ships_are_placed(&ships, sizes));
+    }
+        
+    #[test]
+    fn test_check_all_ships_are_placed_when_they_are_not() {
+        let ships = vec![
+            Ship { head: Pos { x: 1, y: 1 }, size: 2, orientation: Orientation::Horizontal },
+            Ship { head: Pos { x: 0, y: 2 }, size: 2, orientation: Orientation::Vertical },
+        ];
+        let sizes = vec![2, 3];
+        assert!(!check_all_ships_are_placed(&ships, sizes));
+    }
+        
+    #[test]
+    fn test_check_all_ships_are_placed_when_sizes_count_is_wrong() {
+        let ships = vec![
+            Ship { head: Pos { x: 1, y: 1 }, size: 2, orientation: Orientation::Horizontal },
+            Ship { head: Pos { x: 0, y: 2 }, size: 3, orientation: Orientation::Vertical },
+            Ship { head: Pos { x: 2, y: 2 }, size: 3, orientation: Orientation::Vertical },
+        ];
+        let sizes = vec![2, 2, 3];
+        assert!(!check_all_ships_are_placed(&ships, sizes));
+    }
 }
