@@ -227,4 +227,32 @@ mod tests {
         let result = check_ship_placement(&board, &ships);
         assert!(result);
     }
+    
+    #[test]
+    fn test_check_ships_are_on_board() {
+        let board = BoardDefinition { width: 5, height: 5, adjacent_ships_allowed: true };
+        let ships = vec![
+            Ship { head: Pos { x: 1, y: 1 }, size: 2, orientation: Orientation::Horizontal },
+            Ship { head: Pos { x: 0, y: 2 }, size: 2, orientation: Orientation::Vertical },
+        ];
+        assert!(check_ships_are_on_board(&board, &ships));
+    }
+        
+    #[test]
+    fn test_check_ships_partially_outside_are_on_board() {
+        let board = BoardDefinition { width: 4, height: 4, adjacent_ships_allowed: true };
+        let ships = vec![
+            Ship { head: Pos { x: 3, y: 2 }, size: 3, orientation: Orientation::Horizontal },
+        ];
+        assert!(!check_ships_are_on_board(&board, &ships));
+    }
+        
+    #[test]
+    fn test_check_ships_completelly_outside_are_on_board() {
+        let board = BoardDefinition { width: 3, height: 3, adjacent_ships_allowed: true };
+        let ships = vec![
+            Ship { head: Pos { x: 3, y: 1 }, size: 2, orientation: Orientation::Vertical },
+        ];
+        assert!(!check_ships_are_on_board(&board, &ships));
+    }
 }
