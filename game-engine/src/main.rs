@@ -107,3 +107,34 @@ pub fn hit_result(ships: &Vec<Ship>, pos: &Pos) -> HitResult {
     }
     HitResult::Miss
 }
+
+#[derive(Debug)]
+pub enum MoveResult {
+    Miss,
+    Hit(Ship),
+    Sunk(Ship),
+}
+
+pub fn move_result(board: &BoardState, ships: &Vec<Ship>, pos: &Pos) -> MoveResult {
+    match hit_result(ships, pos) {
+        HitResult::Miss => MoveResult::Miss,
+        HitResult::Hit(ship) => {
+            let mut ship_positions = Vec::new();
+            for i in 0..ship.size {
+                match ship.orientation {
+                    Orientation::Horizontal => {
+                        ship_positions.push(Pos { x: ship.head.x, y: ship.head.y + i });
+                    }
+                    Orientation::Vertical => {
+                        ship_positions.push(Pos { x: ship.head.x + i, y: ship.head.y });
+                    }
+                }
+            }
+            let test = ship_positions.iter().all(|pos| board.board[pos.x][pos.y] == Field::Hit);
+            match test {
+                true => MoveResult::Sunk(ship),
+                false => MoveResult::Hit(ship),
+            }
+        }
+    }
+}
