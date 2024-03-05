@@ -36,3 +36,31 @@ pub enum Orientation {
     Horizontal,
     Vertical,
 }
+
+impl BoardState {
+    pub fn of(board_str: &String, ships: Vec<usize>, adjacent: bool) -> BoardState {
+        let mut board = vec![];
+        let mut height = 0;
+        let mut width = 0;
+        for line in board_str.split('|') {
+            height += 1;
+            width = line.len();
+            let mut row = vec![];
+            for ch in line.chars() {
+                let field = match ch {
+                    '?' => Field::Empty,
+                    'x' => Field::Sunk,
+                    'o' => Field::Hit,
+                    _ => Field::Miss,
+                };
+                row.push(field);
+            }
+            board.push(row);
+        }
+        BoardState {
+            remaining_ships: ships,
+            definition: BoardDefinition { width, height, adjacent_ships_allowed: adjacent },
+            board,
+        }
+    }
+}

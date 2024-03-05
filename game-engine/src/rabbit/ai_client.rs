@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, ai::{random_engine, Engine}, data::BoardDefinition};
+use crate::{rabbit::DESTINATION_EXCHANGE, ai::{random_engine, Engine}, data::{BoardDefinition, BoardState}};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -85,6 +85,8 @@ enum Phase {
 #[serde(rename_all = "camelCase")]
 struct EngineAIEvent {
     game_id: i32,
+    row: usize,
+    column: usize,
     malformed: Option<bool>,
 }
 
@@ -118,6 +120,8 @@ impl Default for EngineAIEvent {
     fn default() -> EngineAIEvent {
         EngineAIEvent { 
             game_id: -1,
+            row: 0,
+            column: 0,
             malformed: None,
         } 
     } 
@@ -159,5 +163,13 @@ fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
 }
 
 fn process_move_event(game_msg: &AIMessage) -> EngineAIEvent {
-    Default::default()
+    let board = BoardState::of(&game_msg.game_state, vec![], true);
+    let mut engine = get_engine();
+    let mv = engine.get_shot(&board);
+    EngineAIEvent {
+        game_id: game_msg.game_id,
+        row: mv.x,
+        column: mv.y,
+        malformed: None,
+    }
 }
