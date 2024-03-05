@@ -35,7 +35,7 @@ public class Game {
     @Column(columnDefinition = "TIME")
     private LocalDateTime lastMoveAt;
 
-    // ?=empty, .=hit, x=sunk, o=miss
+    // ?=empty, .=hit, x=sunk, o=miss, |=end of row
     private String userCurrentState;
     private String opponentCurrentState;
 
