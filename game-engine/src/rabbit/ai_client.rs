@@ -92,7 +92,9 @@ struct EngineAIEvent {
 #[serde(rename_all = "camelCase")]
 struct EnginePlacementEvent {
     game_id: i32,
-    ships: Vec<ShipMsg>,
+    ships: String,
+    first_user: bool,
+    legal: bool,
     malformed: Option<bool>,
 }
 
@@ -145,9 +147,13 @@ fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
              }
             )
         .collect();
+    let ships = serde_json::to_string(&ships).unwrap();
+
     EnginePlacementEvent {
         game_id: game_msg.game_id,
         ships,
+        first_user: true, //TODO
+        legal: true,
         malformed: None,
     }
 }
