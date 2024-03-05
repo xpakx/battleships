@@ -2,6 +2,7 @@ use lapin::{Connection, ConnectionProperties, options::{BasicConsumeOptions, Bas
 use serde::{Serialize, Deserialize};
 mod move_client;
 mod placement_client;
+mod ai_client;
 
 const EXCHANGE_NAME: &str = "battleships.moves.topic";
 
@@ -114,6 +115,7 @@ pub async fn consumer(rabbit_uri: &str) -> Result<(), lapin::Error> {
 
     move_client::set_delegate(consumer, channel.clone());
     placement_client::set_delegate(consumer2, channel.clone());
+    ai_client::set_delegate(consumer3, channel.clone());
     println!("Waiting for messages...");
 
     Ok(())
