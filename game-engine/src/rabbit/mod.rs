@@ -1,5 +1,6 @@
 use lapin::{Connection, ConnectionProperties, options::{BasicConsumeOptions, BasicAckOptions, QueueBindOptions, QueueDeclareOptions, ExchangeDeclareOptions}, types::FieldTable, message::DeliveryResult, ExchangeKind};
 use serde::{Serialize, Deserialize};
+mod move_client;
 
 const EXCHANGE_NAME: &str = "battleships.moves.topic";
 
@@ -109,6 +110,9 @@ pub async fn consumer(rabbit_uri: &str) -> Result<(), lapin::Error> {
         FieldTable::default())
         .await
         .expect("Cannot create consumer");
+
+    move_client::set_delegate(consumer, channel);
+    println!("Waiting for messages...");
 
     Ok(())
 }
