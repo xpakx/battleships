@@ -73,6 +73,19 @@ pub async fn consumer(rabbit_uri: &str) -> Result<(), lapin::Error> {
         .await
         .expect("Cannot bind queue");
 
+    channel
+        .exchange_declare(
+            DESTINATION_EXCHANGE,
+            ExchangeKind::Topic,
+            ExchangeDeclareOptions {
+                durable: true,
+                ..Default::default()
+            },
+            FieldTable::default(),
+            )
+        .await
+        .expect("Cannot declare exchange");
+
     let consumer = channel.basic_consume(
         MOVES_QUEUE,
         "engine_move_consumer",
