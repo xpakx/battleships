@@ -1,6 +1,7 @@
 mod data;
 mod ai;
 mod validator;
+mod rabbit;
 use data::*;
 use ai::random_engine::*;
 use ai::greedy_engine::*;
