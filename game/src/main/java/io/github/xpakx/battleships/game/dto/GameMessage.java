@@ -5,6 +5,7 @@ import io.github.xpakx.battleships.game.GameState;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -38,13 +39,17 @@ public class GameMessage {
     }
 
     private static String[][] stringToBoard(String str) {
-        List<String> list = str.chars()
-                .mapToObj((c) -> charToSymbol((char)c))
-                .toList();
-        var board = new String[3][3];
-        for (int row=0; row<3; row++) {
-            for (int column=0; column<3; column++) {
-                board[row][column] = list.get(3*row+column);
+        List<List<String>> fields = Arrays.stream(str.split("\\|"))
+                .map(
+                        (row) -> row
+                                .chars()
+                                .mapToObj((c) -> charToSymbol((char) c))
+                                .toList()
+                ).toList();
+        String[][] board = new String[fields.size()][fields.getFirst().size()];
+        for (int row=0; row< board.length; row++) {
+            for (int column=0; column<board[row].length; column++) {
+                board[row][column] = fields.get(row).get(column);
             }
         }
         return board;
