@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::rabbit::DESTINATION_EXCHANGE;
+use crate::{rabbit::DESTINATION_EXCHANGE, ai::{random_engine, Engine}, data::BoardDefinition};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -83,24 +83,75 @@ enum Phase {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct EngineEvent {
+struct EngineAIEvent {
     game_id: i32,
     malformed: Option<bool>,
 }
 
-impl Default for EngineEvent {
-    fn default() -> EngineEvent {
-        EngineEvent { 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct EnginePlacementEvent {
+    game_id: i32,
+    ships: Vec<ShipMsg>,
+    malformed: Option<bool>,
+}
+
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ShipMsg {
+    pub head_x: usize,
+    pub head_y: usize,
+    pub size: usize,
+    pub orientation: Orientation,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
+impl Default for EngineAIEvent {
+    fn default() -> EngineAIEvent {
+        EngineAIEvent { 
             game_id: -1,
             malformed: None,
         } 
     } 
 }
 
-fn process_placement_event(game_msg: &AIMessage) -> EngineEvent {
-    Default::default()
+fn get_engine() -> Box<dyn Engine> {
+    return Box::new(random_engine::RandomEngine::new())
+    // TODO
 }
 
-fn process_move_event(game_msg: &AIMessage) -> EngineEvent {
+fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
+    let mut engine = get_engine();
+    let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false };
+    let sizes = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 4];
+    let ships: Vec<ShipMsg> = engine
+        .place_ships(&board_definition, sizes)
+        .iter()
+        .map(|ship| 
+             ShipMsg {
+                 head_x: ship.head.x,
+                 head_y: ship.head.y,
+                 size: ship.size,
+                 orientation: match ship.orientation {
+                     crate::data::Orientation::Horizontal => Orientation::Horizontal,
+                     crate::data::Orientation::Vertical => Orientation::Vertical,
+                 }
+             }
+            )
+        .collect();
+    EnginePlacementEvent {
+        game_id: game_msg.game_id,
+        ships,
+        malformed: None,
+    }
+}
+
+fn process_move_event(game_msg: &AIMessage) -> EngineAIEvent {
     Default::default()
 }
