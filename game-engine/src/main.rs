@@ -118,6 +118,13 @@ pub enum MoveResult {
 }
 
 pub fn move_result(board: &BoardState, ships: &Vec<Ship>, pos: &Pos) -> MoveResult {
+    if  pos.x >= board.definition.height || pos.y >= board.definition.width {
+        return MoveResult::Illegal;
+    }
+    if board.board[pos.x][pos.y] != Field::Empty {
+        return MoveResult::Illegal;
+    }
+
     match hit_result(ships, pos) {
         HitResult::Miss => MoveResult::Miss,
         HitResult::Hit(ship) => {
