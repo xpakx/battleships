@@ -7,3 +7,15 @@ pub trait Engine {
     fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<usize>) -> Vec<Ship>;
     fn get_shot(&mut self, board: &BoardState) -> Pos;
 }
+
+pub enum EngineType {
+    Random,
+    Greedy,
+}
+
+pub fn get_engine(engine: EngineType) -> Box<dyn Engine> {
+    match engine {
+        EngineType::Random => Box::new(random_engine::RandomEngine::new()),
+        EngineType::Greedy => Box::new(greedy_engine::GreedyEngine::new()),
+    }
+}

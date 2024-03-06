@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, ai::{random_engine, Engine}, data::BoardState, get_board_definition, RuleSet, get_ship_sizes};
+use crate::{rabbit::DESTINATION_EXCHANGE, ai::{get_engine, EngineType}, data::BoardState, get_board_definition, RuleSet, get_ship_sizes};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -127,13 +127,8 @@ impl Default for EngineAIEvent {
     } 
 }
 
-fn get_engine() -> Box<dyn Engine> {
-    return Box::new(random_engine::RandomEngine::new())
-    // TODO
-}
-
 fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
-    let mut engine = get_engine();
+    let mut engine = get_engine(EngineType::Random);
     let board_definition = get_board_definition(RuleSet::Polish);
     let sizes = get_ship_sizes(RuleSet::Polish);
     let ships: Vec<ShipMsg> = engine
@@ -164,7 +159,7 @@ fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
 
 fn process_move_event(game_msg: &AIMessage) -> EngineAIEvent {
     let board = BoardState::of(&game_msg.game_state, vec![], true);
-    let mut engine = get_engine();
+    let mut engine = get_engine(EngineType::Random);
     let mv = engine.get_shot(&board);
     EngineAIEvent {
         game_id: game_msg.game_id,
