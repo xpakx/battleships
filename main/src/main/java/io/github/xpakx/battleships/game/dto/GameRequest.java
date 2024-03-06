@@ -29,4 +29,14 @@ public class GameRequest {
     public boolean isOpponentIdUnsetForNonUserType() {
         return type == GameType.USER || Objects.isNull(opponent);
     }
+
+    @AssertTrue(message = "AI game must have specified AI type!")
+    public boolean isAITypeSetForAIGame() {
+        return type == GameType.USER || (Objects.nonNull(aiType) && aiType != AIType.None);
+    }
+
+    @AssertTrue(message = "non-AI game cannot have AI type!")
+    public boolean isAITypeUnsetForNonAIGame() {
+        return type == GameType.AI || Objects.isNull(aiType) || aiType == AIType.None;
+    }
 }
