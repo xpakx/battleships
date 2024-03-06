@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum GameRuleset {
-    CLASSIC("Classic"),
-    POLISH("Polish");
+    Classic("Classic"),
+    Polish("Polish");
 
     private final String name;
 }

@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AIType {
-    RANDOM("Random"),
-    GREEDY("Greedy"),
-    NONE("None") ;
+    Random("Random"),
+    Greedy("Greedy"),
+    None("None") ;
 
     private final String type;
 }

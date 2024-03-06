@@ -1,5 +1,7 @@
 package io.github.xpakx.battleships.game.dto;
 
+import io.github.xpakx.battleships.game.AIType;
+import io.github.xpakx.battleships.game.GameRuleset;
 import io.github.xpakx.battleships.game.GameType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +16,9 @@ public class GameRequest {
     @NotNull(message = "Game type cannot be null!")
     private GameType type;
     private String opponent;
+    @NotNull(message = "Game must have a rule set")
+    private GameRuleset rules;
+    private AIType aiType;
 
     @AssertTrue(message = "User game request must have opponent username!")
     public boolean isOpponentIdSetForNonAIType() {

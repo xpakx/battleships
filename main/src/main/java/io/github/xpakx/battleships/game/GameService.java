@@ -22,20 +22,20 @@ public class GameService {
     public NewGameResponse newGame(String username, GameRequest request) {
         Game game;
         if (request.getType() == GameType.AI) {
-            game = newGameAgainstAI(username);
+            game = newGameAgainstAI(username, request);
         } else {
-            game = newGameAgainstUser(username, request.getOpponent());
+            game = newGameAgainstUser(username, request);
         }
         return new NewGameResponse(game.getId());
     }
 
-    private Game newGameAgainstUser(String username, String opponent) {
+    private Game newGameAgainstUser(String username, GameRequest request) {
         var newGame = new Game();
         newGame.setUser(userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
-        newGame.setOpponent(userRepository.findByUsername(opponent).orElseThrow(UserNotFoundException::new));
+        newGame.setOpponent(userRepository.findByUsername(request.getOpponent()).orElseThrow(UserNotFoundException::new));
         newGame.setType(GameType.USER);
-        newGame.setRuleset(GameRuleset.CLASSIC);
-        newGame.setAiType(AIType.NONE);
+        newGame.setRuleset(request.getRules());
+        newGame.setAiType(AIType.None);
         var emptyState = createEmptyGameState(10, 10);
         newGame.setUserCurrentState(emptyState);
         newGame.setOpponentCurrentState(emptyState);
@@ -47,12 +47,12 @@ public class GameService {
         return gameRepository.save(newGame);
     }
 
-    private Game newGameAgainstAI(String username) {
+    private Game newGameAgainstAI(String username, GameRequest request) {
         var newGame = new Game();
         newGame.setUser(userRepository.findByUsername(username).orElseThrow(UserNotFoundException::new));
         newGame.setType(GameType.AI);
-        newGame.setRuleset(GameRuleset.CLASSIC);
-        newGame.setAiType(AIType.RANDOM);
+        newGame.setRuleset(request.getRules());
+        newGame.setAiType(request.getAiType());
         var emptyState = createEmptyGameState(10, 10);
         newGame.setUserCurrentState(emptyState);
         newGame.setOpponentCurrentState(emptyState);
