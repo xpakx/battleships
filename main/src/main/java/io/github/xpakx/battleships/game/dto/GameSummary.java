@@ -1,5 +1,7 @@
 package io.github.xpakx.battleships.game.dto;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.xpakx.battleships.game.AIType;
 import io.github.xpakx.battleships.game.Game;
 import io.github.xpakx.battleships.game.GameRuleset;
@@ -32,7 +34,7 @@ public class GameSummary {
     private boolean userStarts;
 
     private boolean myTurn;
-    // TODO myShips
+    private List<Ship> myShips;
 
     public static GameSummary of(Game game, String requester) {
         var summary = new GameSummary();
@@ -52,12 +54,23 @@ public class GameSummary {
         );
         if (requester.equals(summary.getUsername1())) {
             summary.setMyTurn(game.isUserTurn());
-            // TODO ship list
+            summary.setMyShips(stringToShips(game.getUserShips()));
         } else if (requester.equals(summary.getUsername2())) {
             summary.setMyTurn(!game.isUserTurn());
+            summary.setMyShips(stringToShips(game.getOpponentShips()));
         }
         summary.setUserStarts(game.isUserStarts());
         return summary;
+    }
+
+    private static List<Ship> stringToShips(String userShips) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(userShips, new TypeReference<List<Ship>>(){});
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 
