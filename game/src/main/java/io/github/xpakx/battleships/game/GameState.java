@@ -24,8 +24,8 @@ public class GameState implements Serializable {
     private String username1;
     private String username2;
     private boolean user2AI;
-    // private GameRuleset ruleset;
-    // private AIType aiType;
+    private GameRuleset ruleset;
+    private AIType aiType;
 
     private boolean firstUserStarts;
     private boolean firstUserTurn;

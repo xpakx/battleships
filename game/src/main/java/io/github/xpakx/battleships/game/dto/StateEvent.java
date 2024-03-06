@@ -1,5 +1,7 @@
 package io.github.xpakx.battleships.game.dto;
 
+import io.github.xpakx.battleships.game.AIType;
+import io.github.xpakx.battleships.game.GameRuleset;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,8 +18,8 @@ public class StateEvent {
     private String username1;
     private String username2;
     private boolean user2AI;
-    // private GameRuleset ruleset;
-    // private AIType aiType;
+    private GameRuleset ruleset;
+    private AIType aiType;
 
     private boolean firstUserStarts;
     private boolean firstUserTurn;
