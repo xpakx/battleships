@@ -155,7 +155,7 @@ public class GameService {
             game.setBlocked(false);
             repository.save(game);
         }
-        statePublisher.publish(game);
+        statePublisher.publish(game, event.getRow(), event.getColumn());
 
         simpMessagingTemplate.convertAndSend("/topic/game/" + game.getId(), msg);
         if (!game.isFinished() && game.aiTurn()) {

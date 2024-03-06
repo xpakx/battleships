@@ -19,6 +19,10 @@ public class StatePublisher {
     }
 
     public void publish(GameState game) {
+        publish(game, null, null);
+    }
+
+    public void publish(GameState game, Integer x, Integer y) {
         UpdateEvent event = new UpdateEvent();
         event.setGameId(game.getId());
 
@@ -34,6 +38,9 @@ public class StatePublisher {
 
         event.setUserTurn(game.isFirstUserTurn());
         event.setTimestamp(LocalDateTime.now());
+
+        event.setLastMoveX(x);
+        event.setLastMoveY(y);
 
         template.convertAndSend(updatesTopic, "update", event);
     }

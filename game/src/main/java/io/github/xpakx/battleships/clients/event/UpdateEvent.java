@@ -22,4 +22,7 @@ public class UpdateEvent {
 
     private boolean userTurn;
     private LocalDateTime timestamp;
+
+    private Integer lastMoveX;
+    private Integer lastMoveY;
 }
