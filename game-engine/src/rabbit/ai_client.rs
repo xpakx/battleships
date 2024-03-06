@@ -103,7 +103,7 @@ struct EnginePlacementEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-struct ShipMsg {
+pub struct ShipMsg {
     pub head_x: usize,
     pub head_y: usize,
     pub size: usize,
@@ -111,7 +111,7 @@ struct ShipMsg {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-enum Orientation {
+pub enum Orientation {
     Horizontal,
     Vertical,
 }

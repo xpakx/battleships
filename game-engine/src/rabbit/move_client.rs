@@ -1,7 +1,10 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::rabbit::DESTINATION_EXCHANGE;
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos}, move_result, MoveResult};
+
+use super::ai_client::ShipMsg;
+use crate::data::Orientation;
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -59,17 +62,22 @@ pub fn set_delegate(consumer: Consumer, channel: Channel) {
 #[serde(rename_all = "camelCase")]
 struct MoveMessage {
     game_state: String,
+    targets: String,
     game_id: i32,
-    column: Option<i32>,
-    row: Option<i32>,
-    ai: bool,
-    current_symbol: String,
+    column: usize,
+    row: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EngineEvent {
     game_id: i32,
+    row: usize,
+    column: usize,
+    legal: bool,
+    finished: bool,
+    result: String,
+    new_state: String,
     malformed: Option<bool>,
 }
 
@@ -77,11 +85,54 @@ impl Default for EngineEvent {
     fn default() -> EngineEvent {
         EngineEvent { 
             game_id: -1,
-            malformed: None,
+            row: 0,
+            column: 0,
+            legal: false,
+            finished: false,
+            result: String::from(""),
+            new_state: String::from(""),
+            malformed: Some(true),
         } 
     } 
 }
 
 fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
-    Default::default()
+    let board = BoardState::of(&game_msg.game_state, vec![], true);
+    let ships: Vec<ShipMsg> = match serde_json::from_str(&game_msg.targets) {
+        Ok(ships) => ships,
+        Err(_) => {
+            return Default::default();
+        }
+    };
+    let ships: Vec<Ship> = ships.iter().map(|ship| Ship {
+        head: Pos{x: ship.head_x, y: ship.head_y},
+        size: ship.size,
+        orientation: match ship.orientation {
+            super::ai_client::Orientation::Vertical => Orientation::Vertical,
+            super::ai_client::Orientation::Horizontal => Orientation::Horizontal,
+        },
+    }).collect();
+
+    let hit_pos = Pos {x: game_msg.row, y: game_msg.column};
+
+    let result = move_result(&board, &ships, &hit_pos);
+
+    EngineEvent { 
+        game_id: game_msg.game_id,
+        row: game_msg.row,
+        column: game_msg.column,
+        legal: match result {
+            MoveResult::Illegal => false,
+            _ => true,
+        },
+        finished: false,
+        result: match result {
+            MoveResult::Miss => String::from("Miss"),
+            MoveResult::Hit(_) => String::from("Hit"),
+            MoveResult::Sunk(_) => String::from("Sunk"),
+            MoveResult::Illegal => String::from("Miss"),
+        },
+        new_state: String::from(""), // TODO
+        malformed: None,
+    }
 }

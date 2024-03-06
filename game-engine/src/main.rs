@@ -114,6 +114,7 @@ pub enum MoveResult {
     Miss,
     Hit(Ship),
     Sunk(Ship),
+    Illegal,
 }
 
 pub fn move_result(board: &BoardState, ships: &Vec<Ship>, pos: &Pos) -> MoveResult {
