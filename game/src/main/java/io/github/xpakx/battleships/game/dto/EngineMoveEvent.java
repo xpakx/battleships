@@ -11,7 +11,6 @@ public class EngineMoveEvent {
     Integer row;
     Integer column;
     boolean finished;
-    boolean ai;
     MoveResult result;
     String newState;
 }
