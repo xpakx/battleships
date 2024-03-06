@@ -2,6 +2,7 @@ package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.clients.GamePublisher;
 import io.github.xpakx.battleships.clients.MovePublisher;
+import io.github.xpakx.battleships.clients.StatePublisher;
 import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.game.dto.*;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class GameService {
     private final GameRepository repository;
     private final MovePublisher movePublisher;
     private final GamePublisher gamePublisher;
+    private final StatePublisher statePublisher;
 
     public MoveMessage move(Long gameId, MoveRequest move, String username) {
         var gameOpt = getGameById(gameId);
@@ -153,6 +155,7 @@ public class GameService {
             game.setBlocked(false);
             repository.save(game);
         }
+        statePublisher.publish(game);
 
         simpMessagingTemplate.convertAndSend("/topic/game/" + game.getId(), msg);
         if (!game.isFinished() && game.aiTurn()) {
@@ -171,6 +174,7 @@ public class GameService {
             game.setOpponentShips(event.getShips());
         }
         repository.save(game);
+        statePublisher.publish(game);
 
         if (game.isGameStarted() && game.aiTurn()) {
             movePublisher.sendAIEvent(game, Phase.Move);
