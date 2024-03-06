@@ -3,6 +3,8 @@ package io.github.xpakx.battleships.game.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 public class UpdateEvent {
@@ -19,6 +21,8 @@ public class UpdateEvent {
     private String opponentShips;
 
     private boolean userTurn;
+
+    private LocalDateTime timestamp;
 
     private Integer lastMoveX;
     private Integer lastMoveY;
