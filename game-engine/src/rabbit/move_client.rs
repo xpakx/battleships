@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};

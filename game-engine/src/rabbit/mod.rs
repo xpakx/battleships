@@ -1,5 +1,4 @@
-use lapin::{Connection, ConnectionProperties, options::{BasicConsumeOptions, BasicAckOptions, QueueBindOptions, QueueDeclareOptions, ExchangeDeclareOptions}, types::FieldTable, message::DeliveryResult, ExchangeKind};
-use serde::{Serialize, Deserialize};
+use lapin::{Connection, ConnectionProperties, options::{BasicConsumeOptions, QueueBindOptions, QueueDeclareOptions, ExchangeDeclareOptions}, types::FieldTable, ExchangeKind};
 mod move_client;
 mod placement_client;
 mod ai_client;
