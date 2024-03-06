@@ -1,7 +1,9 @@
+use std::ops::Add;
+
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos}, move_result, MoveResult};
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos, Field}, move_result, MoveResult};
 
 use super::ai_client::ShipMsg;
 use crate::data::Orientation;
@@ -117,14 +119,46 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
 
     let result = move_result(&board, &ships, &hit_pos);
 
+    let legal_move = match result {
+            MoveResult::Illegal => false,
+            _ => true,
+    };
+
+    let mut state: Vec<char> = vec![];
+    for (i, row) in board.board.iter().enumerate() {
+        if i != 0 {
+            state.push('|');
+        }
+        for (j, field) in row.iter().enumerate() {
+            if i == hit_pos.x && j == hit_pos.y && legal_move {
+                state.push(
+                    match result {
+                        MoveResult::Miss=> 'o',
+                        MoveResult::Hit(_) => '.',
+                        MoveResult::Sunk(_) => 'x',
+                        MoveResult::Illegal => panic!("Shouldn't happen"),
+                    }
+                    );
+            } else {
+                state.push(
+                    match field {
+                        Field::Miss=> 'o',
+                        Field::Hit => '.',
+                        Field::Sunk => 'x',
+                        Field::Empty => '?',
+                    }
+                    );
+                
+            }
+        }
+    }
+    let state: String = state.into_iter().collect();
+
     EngineEvent { 
         game_id: game_msg.game_id,
         row: game_msg.row,
         column: game_msg.column,
-        legal: match result {
-            MoveResult::Illegal => false,
-            _ => true,
-        },
+        legal: legal_move,
         finished: false,
         result: match result {
             MoveResult::Miss => String::from("Miss"),
@@ -132,7 +166,7 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
             MoveResult::Sunk(_) => String::from("Sunk"),
             MoveResult::Illegal => String::from("Miss"),
         },
-        new_state: String::from(""), // TODO
+        new_state: state,
         malformed: None,
     }
 }
