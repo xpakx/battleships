@@ -11,12 +11,17 @@ import org.springframework.stereotype.Service;
 public class UpdateEventHandler {
     private final GameService service;
     private final GameRepository repository;
+    private final MoveService moveService;
 
     @RabbitListener(queues = "${amqp.queue.updates}")
     void handleGame(final UpdateEvent event) {
         try {
             var game = repository.findById(event.getGameId());
-            game.ifPresent((g) -> service.updateGame(g, event));
+            game.ifPresent((g) -> {
+                        service.updateGame(g, event);
+                        moveService.saveMove(event);
+                    }
+            );
         } catch (final Exception e) {
             throw new AmqpRejectAndDontRequeueException(e);
         }

@@ -132,6 +132,7 @@ public class GameService {
         game.setOpponentShips(event.getOpponentShips());
 
         game.setUserTurn(event.isUserTurn());
+        game.setLastMoveAt(event.getTimestamp());
         gameRepository.save(game);
 
         // TODO save move history
