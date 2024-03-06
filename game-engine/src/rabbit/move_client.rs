@@ -157,7 +157,7 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
         row: game_msg.row,
         column: game_msg.column,
         legal: legal_move,
-        finished: false,
+        finished: false, // TODO
         result: match result {
             MoveResult::Miss => String::from("Miss"),
             MoveResult::Hit(_) => String::from("Hit"),

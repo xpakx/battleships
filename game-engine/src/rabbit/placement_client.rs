@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation, BoardDefinition}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}};
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}, get_board_definition, get_ship_sizes, RuleSet};
 
 use super::ai_client::ShipMsg;
 
@@ -102,8 +102,8 @@ fn process_placement_event(game_msg: &PlacementMessage) -> EngineEvent {
             super::ai_client::Orientation::Horizontal => Orientation::Horizontal,
         },
     }).collect();
-    let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false };
-    let sizes = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 4];
+    let board_definition = get_board_definition(RuleSet::Polish);
+    let sizes = get_ship_sizes(RuleSet::Polish);
     let correct = check_ship_placement(&board_definition, &ships);
     let on_board = check_ships_are_on_board(&board_definition, &ships);
     let all = check_all_ships_are_placed(&ships, sizes);

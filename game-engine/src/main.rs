@@ -20,6 +20,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+pub enum RuleSet {
+    Classic, // 1990 Milton Bradley version
+    Polish,
+}
+
+pub fn get_board_definition(ruleset: RuleSet) -> BoardDefinition {
+    match ruleset {
+        RuleSet::Classic => BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: true },
+        RuleSet::Polish => BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false },
+    }
+}
+
+pub fn get_ship_sizes(ruleset: RuleSet) -> Vec<usize> {
+    match ruleset {
+        RuleSet::Classic => vec![2, 3, 3, 4, 5],
+        RuleSet::Polish => vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 4],
+    }
+}
+
 #[allow(dead_code)]
 fn print_board(ships: Vec<Ship>, board_definition: &BoardDefinition) {
     let width = board_definition.width as usize;

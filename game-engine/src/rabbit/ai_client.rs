@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, ai::{random_engine, Engine}, data::{BoardDefinition, BoardState}};
+use crate::{rabbit::DESTINATION_EXCHANGE, ai::{random_engine, Engine}, data::BoardState, get_board_definition, RuleSet, get_ship_sizes};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -134,8 +134,8 @@ fn get_engine() -> Box<dyn Engine> {
 
 fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
     let mut engine = get_engine();
-    let board_definition = BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false };
-    let sizes = vec![1, 1, 1, 1, 2, 2, 2, 3, 3, 4];
+    let board_definition = get_board_definition(RuleSet::Polish);
+    let sizes = get_ship_sizes(RuleSet::Polish);
     let ships: Vec<ShipMsg> = engine
         .place_ships(&board_definition, sizes)
         .iter()
