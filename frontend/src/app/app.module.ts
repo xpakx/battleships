@@ -9,6 +9,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from  '@angular/common/http';
 import { ErrorInterceptor } from './error/error.interceptor';
 import { GameListComponent } from './main/game-list/game-list.component';
 import { MenuComponent } from './main/menu/menu.component';
+import { NewGameModalComponent } from './main/new-game-modal/new-game-modal.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { MenuComponent } from './main/menu/menu.component';
     ModalLoginComponent,
     ModalRegisterComponent,
     GameListComponent,
-    MenuComponent
+    MenuComponent,
+    NewGameModalComponent
   ],
   imports: [
     BrowserModule,

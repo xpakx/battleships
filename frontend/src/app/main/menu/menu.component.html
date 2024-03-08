@@ -1,6 +1,10 @@
+<button (click) = "newGame()">New Game</button>
+<button (click) = "newAIGame()">vs. AI</button>
+<div class = "separator">❦</div>
 <button (click)="getGames()">Games</button>
 <button (click)="getRequests()">Requests</button>
 <button (click)="getArchive()">History</button>
 <div class = "separator">❦</div>
 
 <app-game-list [games]="games" [active]="activeView" [requests]="requestView" (openGame)="open($event)"></app-game-list>
+<app-new-game-modal *ngIf="openRequestModal" (new)="closeRequestModal($event)"></app-new-game-modal>

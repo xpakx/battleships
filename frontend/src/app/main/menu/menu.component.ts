@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Game } from '../dto/game';
+import { GameResponse } from '../dto/game-response';
 import { GameManagementService } from '../game-management.service';
 
 @Component({
@@ -14,6 +15,7 @@ export class MenuComponent implements OnInit {
   activeView: boolean = false;
   error: boolean = false;
   errorMsg: String = "";
+  openRequestModal: boolean = false;
 
   @Output() openGame: EventEmitter<number> = new EventEmitter<number>();
 
@@ -70,8 +72,35 @@ export class MenuComponent implements OnInit {
     this.error = true;
     this.errorMsg = err.message;
   }
+  
+  newGame() {
+    this.openRequestModal = true;
+  }
+
+  newAIGame() {
+    this.gameService.newGame({type: "AI"})
+      .subscribe({
+        next: (game: GameResponse) => this.open(game.id),
+        error: (err: HttpErrorResponse) => this.onError(err)
+      });
+  }
 
   open(gameId: number) {
     this.openGame.emit(gameId);
+  }
+
+  closeRequestModal(username: String) {
+    this.openRequestModal = false;
+    this.gameService.newGame({type: "USER", opponent: username}) // TODO
+      .subscribe({
+        next: (game: GameResponse) => this.onRequestSent(username),
+        error: (err: HttpErrorResponse) => this.onError(err)
+      });
+
+  }
+
+  onRequestSent(username: String) {
+    // todo
+    console.log(`${username} invited to game`)
   }
 }

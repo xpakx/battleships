@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Game } from './dto/game';
+import { GameRequest } from './dto/game-request';
+import { GameResponse } from './dto/game-response';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +17,10 @@ export class GameManagementService {
   private getHeaders(): HttpHeaders {
     let token = localStorage.getItem("token");
     return new HttpHeaders({'Authorization':`Bearer ${token}`});
+  }
+
+  public newGame(request: GameRequest): Observable<GameResponse> {
+    return this.http.post<GameResponse>(`${this.apiUrl}`, request, { headers: this.getHeaders() });
   }
 
   public getActiveGames(): Observable<Game[]> {
