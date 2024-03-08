@@ -20,6 +20,35 @@ export class GameListComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  accept(gameId: number) {
+    this.gameService.acceptRequest(gameId, {accepted: true})
+      .subscribe({
+        next: (value: Boolean) => this.onAccept(gameId),
+        error: (err: HttpErrorResponse) => this.onError(err)
+      });
+  }
+
+  onAccept(gameId: number) {
+    this.open(gameId);
+  }
+
+  reject(gameId: number) {
+    this.gameService.acceptRequest(gameId, {accepted: false})
+      .subscribe({
+        next: (value: Boolean) => this.onReject(gameId),
+        error: (err: HttpErrorResponse) => this.onError(err)
+      });
+
+  }
+
+  onReject(gameId: number) {
+    // todo
+  }
+
+  onError(err: HttpErrorResponse) {
+    // todo
+  }
+
   open(gameId: number) {
     this.openGame.emit(gameId);
   }

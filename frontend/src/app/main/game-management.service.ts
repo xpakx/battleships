@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { AcceptRequest } from './dto/accept-request';
 import { Game } from './dto/game';
 import { GameRequest } from './dto/game-request';
 import { GameResponse } from './dto/game-response';
@@ -33,5 +34,9 @@ export class GameManagementService {
 
   public getFinishedGames(): Observable<Game[]> {
     return this.http.get<Game[]>(`${this.apiUrl}/archive`, { headers: this.getHeaders() });
+  }
+  
+  public acceptRequest(gameId: number, request: AcceptRequest): Observable<Boolean> {
+    return this.http.post<Boolean>(`${this.apiUrl}/${gameId}/request`, request, { headers: this.getHeaders() });
   }
 }
