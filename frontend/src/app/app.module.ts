@@ -5,7 +5,8 @@ import { AppComponent } from './app.component';
 import { ModalLoginComponent } from './auth/modal-login/modal-login.component';
 import { ModalRegisterComponent } from './auth/modal-register/modal-register.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from  '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from  '@angular/common/http';
+import { ErrorInterceptor } from './error/error.interceptor';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,14 @@ import { HttpClientModule } from  '@angular/common/http';
     FormsModule,
     ReactiveFormsModule,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorInterceptor,
+      multi: true
+    }
+
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
