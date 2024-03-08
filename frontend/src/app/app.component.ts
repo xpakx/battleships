@@ -6,5 +6,19 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'battleships';
+  title = 'Battleships';
+  registerCard = false;
+  gameId?: number;
+
+  get logged(): boolean {
+    return localStorage.getItem("username") != null;
+  }
+
+  changeRegisterCard(value: boolean) {
+    this.registerCard = value;
+  }
+  
+  open(gameId: number) {
+    this.gameId = gameId;
+  }
 }
