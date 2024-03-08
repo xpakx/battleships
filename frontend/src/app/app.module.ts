@@ -10,6 +10,8 @@ import { ErrorInterceptor } from './error/error.interceptor';
 import { GameListComponent } from './main/game-list/game-list.component';
 import { MenuComponent } from './main/menu/menu.component';
 import { NewGameModalComponent } from './main/new-game-modal/new-game-modal.component';
+import { BoardComponent } from './board/board/board.component';
+import { FieldPipe } from './board/field.pipe';
 
 @NgModule({
   declarations: [
@@ -18,7 +20,9 @@ import { NewGameModalComponent } from './main/new-game-modal/new-game-modal.comp
     ModalRegisterComponent,
     GameListComponent,
     MenuComponent,
-    NewGameModalComponent
+    NewGameModalComponent,
+    BoardComponent,
+    FieldPipe
   ],
   imports: [
     BrowserModule,

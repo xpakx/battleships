@@ -1,0 +1,24 @@
+<div id="board">
+    <ng-container *ngFor="let row of myBoard; index as i">
+        <div 
+        *ngFor="let cell of row; index as j" 
+        class="cell" 
+        [class.illegal] = "error[i][j] == 'illegal'"
+        id="cell{{i}}{{j}}" >
+            {{cell | field}}
+        </div>
+    </ng-container>
+</div>
+<div id="board">
+    <ng-container *ngFor="let row of opponentBoard; index as i">
+        <div 
+        *ngFor="let cell of row; index as j" 
+        class="cell" 
+        [class.illegal] = "error[i][j] == 'illegal'"
+        id="cell{{i}}{{j}}" 
+        (click)="move(i, j)">
+            {{cell | field}}
+        </div>
+    </ng-container>
+</div>
+<div class="msg" *ngIf="finished">{{msg}}</div>
