@@ -1,0 +1,10 @@
+<ul>
+    <li *ngFor="let game of games">
+        {{ game.id }}
+        <div>
+            {{ game.username1 }} vs {{ game.username2}}
+        </div>
+
+        <button *ngIf="active" (click)="open(game.id)">Open</button>
+    </li>
+</ul>
