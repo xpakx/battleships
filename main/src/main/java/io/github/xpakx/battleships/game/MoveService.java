@@ -4,6 +4,8 @@ import io.github.xpakx.battleships.game.dto.UpdateEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MoveService {
@@ -19,6 +21,10 @@ public class MoveService {
         move.setUserCurrentState(event.getUserCurrentState());
         move.setOpponentCurrentState(event.getOpponentCurrentState());
         moveRepository.save(move);
+    }
+
+    public List<Move> getMoveHistory(Long gameId) {
+        return moveRepository.findByGame_IdOrderByTimestampAsc(gameId);
     }
 
 }
