@@ -3,15 +3,6 @@ server:
 spring:
   cloud:
     gateway:
-      routes:
-        - id: main
-          uri: http://localhost:8080
-          predicates:
-            - Path=/authenticate,/register,/game/**
-        - id: game
-          uri: http://localhost:8081
-          predicates:
-            - Path=/app/**,/topic/**,/play/**
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_UNIQUE
       globalcors:
