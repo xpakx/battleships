@@ -12,20 +12,41 @@ import { WebsocketService } from '../websocket.service';
 export class BoardComponent implements OnInit {
   _gameId?: number;
   myBoard: ("Sunk" | "Hit" | "Miss" | "Empty")[][] = [
-    ["Hit", "Empty", "Empty"],
-    ["Empty", "Miss", "Empty"],
-    ["Empty", "Empty", "Empty"]
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
   ];
   opponentBoard: ("Sunk" | "Hit" | "Miss" | "Empty")[][] = [
-    ["Hit", "Empty", "Empty"],
-    ["Empty", "Miss", "Empty"],
-    ["Empty", "Empty", "Empty"]
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
+    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
   ];
   game?: BoardMessage;
   error: String[][] = [
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""]
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
+    ["", "", "","", "", "" ,"", "", "", ""],
   ];
   private moveSub?: Subscription;
   private boardSub?: Subscription;
@@ -48,7 +69,9 @@ export class BoardComponent implements OnInit {
 
   ngOnInit(): void {
     this.boardSub = this.websocket.board$.subscribe((board: BoardMessage) => {
-      this.myBoard = board.state1; // TODO
+      // TODO: should fetch ships from the game service if game is started
+
+      this.myBoard = board.state1; // TODO: correctly assign both boards
       this.game = board;
       console.log(board);
     });
@@ -108,7 +131,6 @@ export class BoardComponent implements OnInit {
         }
       } 
     }
-
   }
 
 }
