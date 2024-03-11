@@ -3,3 +3,7 @@ server:
 logging:
   level:
     org.springframework.cloud.gateway.handler.predicate: trace
+
+main.url: http://localhost:8080
+game.url: http://localhost:8081
+frontend.url: http://localhost:4200

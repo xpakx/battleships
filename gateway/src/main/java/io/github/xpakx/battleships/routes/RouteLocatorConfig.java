@@ -1,5 +1,6 @@
 package io.github.xpakx.battleships.routes;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.DedupeResponseHeaderGatewayFilterFactory;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -11,16 +12,21 @@ import org.springframework.http.HttpHeaders;
 @Configuration
 public class RouteLocatorConfig {
     @Bean
-    public RouteLocator myRoutes(RouteLocatorBuilder builder, GatewayFilter dedupeResponseHeaderFilter) {
+    public RouteLocator myRoutes(
+            RouteLocatorBuilder builder,
+            GatewayFilter dedupeResponseHeaderFilter,
+            @Value("${main.url}") final String mainUrl,
+            @Value("${game.url}") final String gameUrl
+            ) {
         return builder.routes()
                 .route("main", r -> r
                         .path("/authenticate", "/register", "/game/**")
                         .filters(f -> f.filter(dedupeResponseHeaderFilter))
-                        .uri("http://localhost:8080"))
+                        .uri(mainUrl))
                 .route("game", r -> r
                         .path("/app/**", "/topic/**", "/play/**")
                         .filters(f -> f.filter(dedupeResponseHeaderFilter))
-                        .uri("http://localhost:8081"))
+                        .uri(gameUrl))
                 .build();
     }
 
