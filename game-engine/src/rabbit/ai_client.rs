@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, ai::{get_engine, EngineType}, data::BoardState, get_board_definition, RuleSet, get_ship_sizes};
+use crate::{rabbit::DESTINATION_EXCHANGE, ai::{get_engine, EngineType, Engine}, data::{BoardState, BoardDefinition}, get_board_definition, RuleSet, get_ship_sizes};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -73,6 +73,21 @@ struct AIMessage {
     game_id: i32,
     game_state: String,
     phase: Phase,
+    ruleset: ReqRuleSet,
+    #[serde(rename = "type")]
+    ai_type: AIType,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ReqRuleSet {
+    Classic,
+    Polish,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum AIType {
+    Random,
+    Greedy,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -127,9 +142,23 @@ impl Default for EngineAIEvent {
     } 
 }
 
+fn to_engine(ai_type: &AIType) -> Box<dyn Engine> {
+    match ai_type {
+        AIType::Random => get_engine(EngineType::Random),
+        AIType::Greedy => get_engine(EngineType::Greedy),
+    }
+}
+
+pub fn to_board_definition(rules: &ReqRuleSet) -> BoardDefinition {
+    match rules {
+        ReqRuleSet::Polish => get_board_definition(RuleSet::Polish),
+        ReqRuleSet::Classic => get_board_definition(RuleSet::Classic),
+    }
+}
+
 fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
-    let mut engine = get_engine(EngineType::Random);
-    let board_definition = get_board_definition(RuleSet::Polish);
+    let mut engine = to_engine(&game_msg.ai_type);
+    let board_definition = to_board_definition(&game_msg.ruleset);
     let sizes = get_ship_sizes(RuleSet::Polish);
     let ships: Vec<ShipMsg> = engine
         .place_ships(&board_definition, sizes)

@@ -1,9 +1,9 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}, get_board_definition, get_ship_sizes, RuleSet};
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}, get_ship_sizes, RuleSet};
 
-use super::ai_client::ShipMsg;
+use super::ai_client::{ShipMsg, ReqRuleSet, to_board_definition};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -63,6 +63,7 @@ struct PlacementMessage {
     game_id: i32,
     first_user: bool,
     ships: String,
+    ruleset: ReqRuleSet,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -102,7 +103,7 @@ fn process_placement_event(game_msg: &PlacementMessage) -> EngineEvent {
             super::ai_client::Orientation::Horizontal => Orientation::Horizontal,
         },
     }).collect();
-    let board_definition = get_board_definition(RuleSet::Polish);
+    let board_definition = to_board_definition(&game_msg.ruleset);
     let sizes = get_ship_sizes(RuleSet::Polish);
     let correct = check_ship_placement(&board_definition, &ships);
     let on_board = check_ships_are_on_board(&board_definition, &ships);
