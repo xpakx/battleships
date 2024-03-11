@@ -134,7 +134,5 @@ public class GameService {
         game.setUserTurn(event.isUserTurn());
         game.setLastMoveAt(event.getTimestamp());
         gameRepository.save(game);
-
-        // TODO save move history
     }
 }
