@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameSummaryTest {
 
-
     @Test
     void shouldMapShips() {
         var ships = """
@@ -36,6 +35,32 @@ class GameSummaryTest {
         assertThat(result.getMyShips().get(1).getHeadY(), equalTo(9));
         assertThat(result.getMyShips().get(1).getSize(), equalTo(1));
         assertThat(result.getMyShips().get(1).getOrientation(), equalTo(ShipOrientation.Vertical));
+    }
 
+    @Test
+    void shouldMapBoard() {
+        var board = "???|x.o|???";
+        var game = new Game();
+        game.setUserCurrentState(board);
+        var user = new User();
+        user.setUsername("Test");
+        game.setUser(user);
+        game.setOpponentCurrentState("");
+        game.setUserShips("{}");
+        game.setOpponentShips("{}");
+
+        var result = GameSummary.of(game, "Test");
+
+        assertThat(result.getCurrentState1()[0][0], equalTo(Field.Empty));
+        assertThat(result.getCurrentState1()[0][1], equalTo(Field.Empty));
+        assertThat(result.getCurrentState1()[0][2], equalTo(Field.Empty));
+
+        assertThat(result.getCurrentState1()[1][0], equalTo(Field.Sunk));
+        assertThat(result.getCurrentState1()[1][1], equalTo(Field.Hit));
+        assertThat(result.getCurrentState1()[1][2], equalTo(Field.Miss));
+
+        assertThat(result.getCurrentState1()[2][0], equalTo(Field.Empty));
+        assertThat(result.getCurrentState1()[2][1], equalTo(Field.Empty));
+        assertThat(result.getCurrentState1()[2][2], equalTo(Field.Empty));
     }
 }
