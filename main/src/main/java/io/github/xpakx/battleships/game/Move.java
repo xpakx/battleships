@@ -19,7 +19,9 @@ public class Move {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "move_row")
     private Integer row;
+    @Column(name = "move_column")
     private Integer column;
     private String userCurrentState;
     private String opponentCurrentState;
