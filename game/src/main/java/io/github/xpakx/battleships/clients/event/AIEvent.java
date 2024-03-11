@@ -1,5 +1,7 @@
 package io.github.xpakx.battleships.clients.event;
 
+import io.github.xpakx.battleships.game.AIType;
+import io.github.xpakx.battleships.game.GameRuleset;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +11,6 @@ public class AIEvent {
     private Long gameId;
     private String gameState;
     private Phase phase;
-    // TODO ruleset
-    // TODO ai type
-
+    private GameRuleset ruleset;
+    private AIType type;
 }
