@@ -52,13 +52,9 @@ services:
       - main
     environment:
       SPRING_PROFILES_ACTIVE: path
-      SPRING_CLOUD_GATEWAY_ROUTES[0]_URI: http://main:8080
-      SPRING_CLOUD_GATEWAY_ROUTES[0]_ID: 'main'
-      SPRING_CLOUD_GATEWAY_ROUTES[0]_PREDICATES[0]: 'Path=/authenticate,/register,/game/**'
-      SPRING_CLOUD_GATEWAY_ROUTES[1]_URI: http://game:8081
-      SPRING_CLOUD_GATEWAY_ROUTES[1]_ID: 'game'
-      SPRING_CLOUD_GATEWAY_ROUTES[1]_PREDICATES[0]: 'Path=/app/**,/topic/**,/play/**'
-      SPRING_CLOUD_GATEWAY_GLOBALCORS_CORS-CONFIGURATIONS['[/**]']_ALLOWEDORIGINS: http://localhost:8001
+      MAIN_URL: http://main:8080
+      GAME_URL: http://game:8081
+      FRONTEND_URL: http://localhost:8001
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: 'rabbitmq'
