@@ -43,7 +43,7 @@ class GameControllerTest {
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
             DockerImageName.parse("postgres:15.1")
-    ).withDatabaseName("ttt_test");
+    ).withDatabaseName("ships_test");
 
     @DynamicPropertySource
     static void props(DynamicPropertyRegistry registry) {
