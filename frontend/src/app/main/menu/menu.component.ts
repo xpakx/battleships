@@ -78,7 +78,7 @@ export class MenuComponent implements OnInit {
   }
 
   newAIGame() {
-    this.gameService.newGame({type: "AI"})
+    this.gameService.newGame({type: "AI", rules: "Classic", aiType: "Random"})
       .subscribe({
         next: (game: GameResponse) => this.open(game.id),
         error: (err: HttpErrorResponse) => this.onError(err)
@@ -91,7 +91,7 @@ export class MenuComponent implements OnInit {
 
   closeRequestModal(username: String) {
     this.openRequestModal = false;
-    this.gameService.newGame({type: "USER", opponent: username}) // TODO
+    this.gameService.newGame({type: "USER", opponent: username, rules: "Classic"})
       .subscribe({
         next: (game: GameResponse) => this.onRequestSent(username),
         error: (err: HttpErrorResponse) => this.onError(err)
