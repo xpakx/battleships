@@ -10,3 +10,4 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=build app/dist/battleships/ /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
