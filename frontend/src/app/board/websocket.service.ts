@@ -29,6 +29,11 @@ export class WebsocketService {
 
   constructor() { 
     this.apiUrl = environment.apiUrl.replace(/^http/, 'ws');
+    if (!this.apiUrl.startsWith("ws")) {
+      let frontendUrl = window.location.origin.replace(/^http/, 'ws');
+      this.apiUrl = frontendUrl + environment.apiUrl;
+    }
+    console.log(this.apiUrl);
   }
 
   connect() {
