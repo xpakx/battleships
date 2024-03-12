@@ -77,6 +77,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8001:80"
+    environment:
+      - API_URL=gateway
+      - API_PORT=8000
+    command: /bin/sh -c "envsubst '$${API_URL} $${API_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
   engine:
     build: 
       context: ./game-engine
