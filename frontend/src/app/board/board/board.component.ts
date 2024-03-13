@@ -185,4 +185,12 @@ export class BoardComponent implements OnInit {
       }
     });
   }
+
+  sendPlacement() {
+    if (this._gameId == undefined) {
+      return;
+    }
+    this.websocket.placeShips(this._gameId, {"ships": this.myShips});
+    console.log("sent ships")
+  }
 }

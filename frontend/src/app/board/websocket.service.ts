@@ -5,6 +5,7 @@ import { BoardMessage } from './dto/board-message';
 import { MoveMessage } from './dto/move-message';
 import { MoveRequest } from './dto/move-request';
 import { IMessage, RxStomp } from '@stomp/rx-stomp';
+import { PlacementRequest } from './dto/placement-request';
 
 @Injectable({
   providedIn: 'root'
@@ -70,6 +71,13 @@ export class WebsocketService {
       return;
     }
     this.rxStomp.publish({ destination: `/app/move/${gameId}`, body: JSON.stringify(move) });
+  }
+
+  placeShips(gameId: number, move: PlacementRequest) {
+    if(this.rxStomp == undefined) {
+      return;
+    }
+    this.rxStomp.publish({ destination: `/app/placement/${gameId}`, body: JSON.stringify(move) });
   }
 
   subscribeGame(gameId: number) {
