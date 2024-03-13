@@ -79,7 +79,7 @@ public class GameState implements Serializable {
     }
 
     public boolean isGameStarted() {
-        return !userShips.isEmpty() && !opponentShips.isEmpty();
+        return !userShips.equals("[]") && !opponentShips.equals("[]");
 
     }
 
