@@ -3,6 +3,8 @@ import { BoardMessage } from '../dto/board-message';
 import { Subscription } from 'rxjs';
 import { MoveMessage } from '../dto/move-message';
 import { WebsocketService } from '../websocket.service';
+import { Ship } from 'src/app/main/dto/ship';
+import { Pair } from '../dto/pair';
 
 @Component({
   selector: 'app-board',
@@ -11,43 +13,13 @@ import { WebsocketService } from '../websocket.service';
 })
 export class BoardComponent implements OnInit {
   _gameId?: number;
-  myBoard: ("Sunk" | "Hit" | "Miss" | "Empty")[][] = [
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-  ];
-  opponentBoard: ("Sunk" | "Hit" | "Miss" | "Empty")[][] = [
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-    ["Hit", "Empty", "Empty","Empty", "Empty", "Empty" ,"Empty", "Empty", "Empty", "Empty"],
-  ];
+  myBoard: ("Sunk" | "Hit" | "Miss" | "Empty")[][] = Array(10).fill(Array(10).fill("Empty"));
+  opponentBoard: ("Sunk" | "Hit" | "Miss" | "Empty")[][] = Array(10).fill(Array(10).fill("Empty"));
   game?: BoardMessage;
-  error: String[][] = [
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-    ["", "", "","", "", "" ,"", "", "", ""],
-  ];
+  error: String[][] = Array(10).fill(Array(10).fill(""));
+  myShips: Ship[] = [];
+  head?: Pair = undefined;
+
   private moveSub?: Subscription;
   private boardSub?: Subscription;
 
@@ -155,4 +127,39 @@ export class BoardComponent implements OnInit {
     }
   }
 
+  place(row: number, column: number) {
+    if (this._gameId == undefined) {
+      return;
+    }
+    if (this.game?.gameStarted) {
+      return;
+    }
+
+    // TODO: delete ship if field is occupied
+
+    if (this.head) {
+      if (this.head.column != column && this.head.row != row) {
+        console.log("bad size")
+        return;
+      }
+      let orientation: "Horizontal" | "Vertical" = "Horizontal";
+      let size = Math.abs(this.head.column - column) + 1
+      if (this.head.column == column) {
+        orientation = "Vertical";
+        size = Math.abs(this.head.row - row) + 1
+      }
+
+      let ship: Ship = {
+        "headX": this.head.row,
+        "headY": this.head.column,
+        "orientation": orientation,
+        "size": size,
+      }
+      this.myShips.push(ship);
+      this.head = undefined;
+      console.log(this.myShips)
+    } else {
+      this.head = { "row": row, "column": column };
+    }
+  }
 }

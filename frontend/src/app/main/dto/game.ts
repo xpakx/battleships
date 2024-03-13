@@ -1,3 +1,5 @@
+import { Ship } from "./ship";
+
 export interface Game {
     id: number;
     currentState: String[][];
@@ -14,4 +16,6 @@ export interface Game {
     username2: String; 
     userStarts: boolean;
     currentSymbol: String;
+
+    myShips: Ship[];
 }
