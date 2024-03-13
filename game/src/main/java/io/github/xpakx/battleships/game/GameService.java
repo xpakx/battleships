@@ -175,7 +175,12 @@ public class GameService {
 
     public void doPlaceShips(EnginePlacementEvent event) {
         var game = getGameById(event.getGameId()).orElseThrow();
+        var username = event.isFirstUser() ? game.getUsername1() : game.getUsername2();
         if (!event.isLegal()) {
+            simpMessagingTemplate.convertAndSend(
+                    "/topic/placement/" + event.getGameId(),
+                    PlacementMessage.rejected(username)
+            );
             return;
         }
         if (event.isFirstUser()) {
@@ -185,6 +190,10 @@ public class GameService {
         }
         repository.save(game);
         statePublisher.publish(game);
+        simpMessagingTemplate.convertAndSend(
+                "/topic/placement/" + event.getGameId(),
+                PlacementMessage.accepted(username)
+        );
 
         if (game.isGameStarted() && game.aiTurn()) {
             movePublisher.sendAIEvent(game, Phase.Move);
