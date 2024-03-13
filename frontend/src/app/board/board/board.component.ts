@@ -52,6 +52,7 @@ export class BoardComponent implements OnInit {
   private boardSub?: Subscription;
 
   finished: boolean = false;
+  errorMsg: boolean = false;
   msg: String = "";
 
   @Input() set gameId(value: number | undefined) {
@@ -69,10 +70,31 @@ export class BoardComponent implements OnInit {
 
   ngOnInit(): void {
     this.boardSub = this.websocket.board$.subscribe((board: BoardMessage) => {
-      // TODO: should fetch ships from the game service if game is started
+      if (board.gameStarted) {
+        // TODO: should fetch ships from the game service
+      }
 
-      this.myBoard = board.state1; // TODO: correctly assign both boards
-      this.game = board;
+      if (board.error) {
+        this.msg = board.error;
+        this.errorMsg = true;
+      } else {
+        this.myBoard = board.state1;
+        this.game = board;
+
+        let currentUser = localStorage.getItem("username");
+        if (currentUser == board.username1 || currentUser == board.username2) {
+          if (currentUser == board.username1) {
+            this.myBoard = board.state1;
+            this.opponentBoard = board.state2;
+          } else {
+            this.myBoard = board.state2;
+            this.opponentBoard = board.state1;
+          }
+        } else {
+          this.myBoard = board.state1;
+          this.opponentBoard = board.state2;
+        }
+      }
       console.log(board);
     });
 
