@@ -1,5 +1,6 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
+import { GameRequest } from '../dto/game-request';
 
 @Component({
   selector: 'app-new-game-modal',
@@ -8,11 +9,14 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 })
 export class NewGameModalComponent implements OnInit {
   requestForm: FormGroup;
-  @Output() new: EventEmitter<String> = new EventEmitter<String>();
+  @Output() new: EventEmitter<GameRequest> = new EventEmitter<GameRequest>();
+  @Input() ai: boolean = false;
 
   constructor(private formBuilder: FormBuilder) {
     this.requestForm = this.formBuilder.group({
       username: [''],
+      rules: [''],
+      ai_type: [''],
     });
    }
 
@@ -23,6 +27,13 @@ export class NewGameModalComponent implements OnInit {
     if (this.requestForm.invalid) {
       return;
     }
-    this.new.emit(this.requestForm.value.username);
+    let request: GameRequest = {
+      "aiType": this.ai ? this.requestForm.value.ai_type : undefined,
+      "rules": this.requestForm.value.rules,
+      "opponent": this.ai ? undefined : this.requestForm.value.username,
+      "type": this.ai ? "AI" : "USER"
+
+    }
+    this.new.emit(request);
   }
 }
