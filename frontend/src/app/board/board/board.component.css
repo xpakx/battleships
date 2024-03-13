@@ -35,3 +35,7 @@
 .cell.illegal {
     background-color: maroon;
 }
+
+.cell.ship {
+    background-color: aquamarine;
+}

@@ -4,6 +4,7 @@
         *ngFor="let cell of row; index as j" 
         class="cell" 
         [class.illegal] = "error[i][j] == 'illegal'"
+        [class.ship] = "shipsBoard[i][j] == 'ship'"
         id="cell{{i}}{{j}}" 
         (click)="place(i, j)">
             {{cell | field}}

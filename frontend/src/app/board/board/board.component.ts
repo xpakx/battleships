@@ -19,6 +19,7 @@ export class BoardComponent implements OnInit {
   error: String[][] = Array(10).fill(Array(10).fill(""));
   myShips: Ship[] = [];
   head?: Pair = undefined;
+  shipsBoard: ("" | "ship")[][] = Array(10).fill(Array(10).fill(""));
 
   private moveSub?: Subscription;
   private boardSub?: Subscription;
@@ -161,5 +162,22 @@ export class BoardComponent implements OnInit {
     } else {
       this.head = { "row": row, "column": column };
     }
+  }
+
+  repaintShips() {
+    this.shipsBoard = Array(10).fill(null).map(() => Array(10).fill(""));
+    this.myShips.forEach((ship: Ship) => {
+      if (ship.orientation == "Horizontal") {
+        let row = ship.headX;
+        for (let i = ship.headY; i < ship.headY+ship.size; i++) {
+          this.shipsBoard[row][i] = "ship";
+        }
+      } else {
+        let column = ship.headY;
+        for (let i = ship.headX; i < ship.headX+ship.size; i++) {
+          this.shipsBoard[i][column] = "ship";
+        }
+      }
+    });
   }
 }
