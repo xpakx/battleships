@@ -20,7 +20,10 @@ public class GameController {
         return service.move(id, move, principal.getName());
     }
 
-    // TODO ship placement
+    @MessageMapping("/placement/{id}")
+    public PlacementMessage placement(@DestinationVariable Long id, PlacementRequest request, Principal principal) {
+        return service.place(id, request, principal.getName());
+    }
 
     @SubscribeMapping("/board/{id}")
     public GameMessage subscribeBoard(@DestinationVariable Long id) {

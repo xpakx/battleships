@@ -1,5 +1,6 @@
 package io.github.xpakx.battleships.game;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.xpakx.battleships.clients.GamePublisher;
 import io.github.xpakx.battleships.clients.MovePublisher;
 import io.github.xpakx.battleships.clients.StatePublisher;
@@ -187,6 +188,39 @@ public class GameService {
 
         if (game.isGameStarted() && game.aiTurn()) {
             movePublisher.sendAIEvent(game, Phase.Move);
+        }
+    }
+
+    public PlacementMessage place(Long gameId, PlacementRequest request, String username) {
+        var gameOpt = getGameById(gameId);
+        if (gameOpt.isEmpty()) {
+            var msg = PlacementMessage.rejected(username);
+            simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
+            return msg;
+        }
+        var game = gameOpt.get();
+        if (game.isGameStarted() && game.isFinished()) {
+            var msg = PlacementMessage.rejected(username);
+            simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
+            return msg;
+        }
+        if (!game.isUserInGame(username)) {
+            var msg = PlacementMessage.rejected(username);
+            simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
+            return msg;
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String shipsString = objectMapper.writeValueAsString(request.getShips());
+            var firstUser = game.getUsername1().equals(username);
+            movePublisher.sendPlacement(gameId, firstUser, shipsString);
+            return null;
+        } catch (Exception e) {
+            logger.error("Failed to convert ships to string: {}, {}", request.getShips(), e.getMessage());
+            var msg = PlacementMessage.rejected(username);
+            simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
+            return msg;
         }
     }
 }
