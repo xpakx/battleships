@@ -6,6 +6,8 @@ import io.github.xpakx.battleships.clients.StatePublisher;
 import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.game.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ public class GameService {
     private final MovePublisher movePublisher;
     private final GamePublisher gamePublisher;
     private final StatePublisher statePublisher;
+    Logger logger = LoggerFactory.getLogger(GameService.class);
 
     public MoveMessage move(Long gameId, MoveRequest move, String username) {
         var gameOpt = getGameById(gameId);
@@ -83,18 +86,21 @@ public class GameService {
 
     public void loadGame(StateEvent event) {
         if (event.isError()) {
+            logger.debug("Error in state event for game {}", event.getId());
             var msg = new GameMessage();
             msg.setError(event.getErrorMessage());
             simpMessagingTemplate.convertAndSend("/topic/board/" + event.getId(), msg);
             return;
         }
         if (event.isFinished()) {
+            logger.debug("Finished state event for game {}", event.getId());
             var msg = new GameMessage();
             msg.setError("Game is already finished!");
             simpMessagingTemplate.convertAndSend("/topic/board/" + event.getId(), msg);
             return;
         }
 
+        logger.debug("Adding state for game {} to Redis", event.getId());
         var game = new GameState();
         game.setId(event.getId());
         game.setUsername1(event.getUsername1());
@@ -109,11 +115,14 @@ public class GameService {
         game.setOpponentCurrentState(event.getOpponentCurrentState());
         game.setOpponentShips(event.getOpponentShips());
         repository.save(game);
+        logger.debug("Sending state of game {} to websocket topic", event.getId());
         var msg = GameMessage.of(game);
         simpMessagingTemplate.convertAndSend("/topic/board/" + game.getId(), msg);
         if (game.aiTurn() && msg.isGameStarted()) {
+            logger.debug("Asking AI engine for move in game {}", event.getId());
             movePublisher.sendAIEvent(game, Phase.Move);
         } else if (!msg.isGameStarted()) {
+            logger.debug("Asking AI engine for ship placement in game {}", event.getId());
             movePublisher.sendAIEvent(game, Phase.Placement);
         }
     }
