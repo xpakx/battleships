@@ -145,20 +145,25 @@ export class BoardComponent implements OnInit {
       }
       let orientation: "Horizontal" | "Vertical" = "Horizontal";
       let size = Math.abs(this.head.column - column) + 1
+      let headX = this.head.row;
+      let headY = Math.min(this.head.column, column);
       if (this.head.column == column) {
         orientation = "Vertical";
         size = Math.abs(this.head.row - row) + 1
+        headX = Math.min(this.head.row, row);
+        headY = this.head.column;
       }
 
       let ship: Ship = {
-        "headX": this.head.row,
-        "headY": this.head.column,
+        "headX": headX,
+        "headY": headY,
         "orientation": orientation,
         "size": size,
       }
       this.myShips.push(ship);
       this.head = undefined;
       console.log(this.myShips)
+      this.repaintShips();
     } else {
       this.head = { "row": row, "column": column };
     }
