@@ -26,4 +26,4 @@
 <div class="msg" *ngIf="finished">{{msg}}</div>
 <div class="msg error" *ngIf="errorMsg">{{msg}}</div>
 
-<button *ngIf="game && !game.gameStarted" (click)="sendPlacement()">Finish placement</button>
+<button *ngIf="game && !game.gameStarted && !shipsPlaced" (click)="sendPlacement()">Finish placement</button>

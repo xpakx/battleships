@@ -30,6 +30,8 @@ export class BoardComponent implements OnInit {
   errorMsg: boolean = false;
   msg: String = "";
 
+  shipsPlaced: boolean = false;
+
   @Input() set gameId(value: number | undefined) {
     this._gameId = value;
     console.log(value);
@@ -79,7 +81,17 @@ export class BoardComponent implements OnInit {
     });
 
     this.placementSub = this.websocket.placement$.subscribe((placement: PlacementMessage) => {
-      // TODO
+        let currentUser = localStorage.getItem("username");
+        if (currentUser == placement.player) {
+          if (placement.legal) {
+            this.shipsPlaced = true;
+            this.errorMsg = false;
+          } else {
+            this.myShips = [];
+            this.msg = "Ship placement not legal!";
+            this.errorMsg = true;
+          }
+        }
     });
   }
 
@@ -139,7 +151,7 @@ export class BoardComponent implements OnInit {
     if (this._gameId == undefined) {
       return;
     }
-    if (this.game?.gameStarted) {
+    if (this.game?.gameStarted || this.shipsPlaced) {
       return;
     }
 
