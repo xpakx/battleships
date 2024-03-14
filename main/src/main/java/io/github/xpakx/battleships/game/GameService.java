@@ -135,4 +135,9 @@ public class GameService {
         game.setLastMoveAt(event.getTimestamp());
         gameRepository.save(game);
     }
+
+    public GameSummary getGame(String username, Long gameId) {
+        var game = gameRepository.findWithUsersById(gameId).orElseThrow(GameNotFoundException::new);
+        return GameSummary.of(game, username);
+    }
 }

@@ -53,4 +53,11 @@ public class GameController {
                 service.acceptRequest(principal.getName(), gameId, request)
         );
     }
+
+    @GetMapping("/game/{gameId}")
+    public ResponseEntity<GameSummary> getGame(@PathVariable Long gameId, Principal principal) {
+        return ResponseEntity.ok(
+                service.getGame(principal.getName(), gameId)
+        );
+    }
 }
