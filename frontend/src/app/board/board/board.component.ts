@@ -5,6 +5,7 @@ import { MoveMessage } from '../dto/move-message';
 import { WebsocketService } from '../websocket.service';
 import { Ship } from 'src/app/main/dto/ship';
 import { Pair } from '../dto/pair';
+import { PlacementMessage } from '../dto/placement-message';
 
 @Component({
   selector: 'app-board',
@@ -23,6 +24,7 @@ export class BoardComponent implements OnInit {
 
   private moveSub?: Subscription;
   private boardSub?: Subscription;
+  private placementSub?: Subscription;
 
   finished: boolean = false;
   errorMsg: boolean = false;
@@ -75,6 +77,10 @@ export class BoardComponent implements OnInit {
       this.makeMove(move);
       console.log(move);
     });
+
+    this.placementSub = this.websocket.placement$.subscribe((placement: PlacementMessage) => {
+      // TODO
+    });
   }
 
   ngOnDestroy() {
@@ -82,6 +88,7 @@ export class BoardComponent implements OnInit {
     this.websocket.disconnect();
     this.boardSub?.unsubscribe();
     this.moveSub?.unsubscribe();
+    this.placementSub?.unsubscribe();
   }
 
   move(row: number, column: number) {

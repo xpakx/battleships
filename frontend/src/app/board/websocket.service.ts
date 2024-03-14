@@ -6,6 +6,7 @@ import { MoveMessage } from './dto/move-message';
 import { MoveRequest } from './dto/move-request';
 import { IMessage, RxStomp } from '@stomp/rx-stomp';
 import { PlacementRequest } from './dto/placement-request';
+import { PlacementMessage } from './dto/placement-message';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,10 @@ export class WebsocketService {
   private moveSubject: Subject<MoveMessage> = new Subject<MoveMessage>();
   private moveQueue?: Subscription;
   move$: Observable<MoveMessage> = this.moveSubject.asObservable();
+
+  private placementSubject: Subject<PlacementMessage> = new Subject<PlacementMessage>();
+  private placementQueue?: Subscription;
+  placement$: Observable<PlacementMessage> = this.placementSubject.asObservable();
 
 
   private chatQueue?: Subscription;
@@ -85,6 +90,7 @@ export class WebsocketService {
     this.subscribeMoves(gameId);
     this.subscribeBoard(gameId);
     this.subscribeChat(gameId);
+    this.subscribePlacement(gameId);
   }
 
   unsubscribe() {
@@ -92,6 +98,7 @@ export class WebsocketService {
     this.moveQueue?.unsubscribe();
     this.boardQueue?.unsubscribe();
     this.boardOOB?.unsubscribe();
+    this.placementQueue?.unsubscribe();
   }
 
   disconnect() {
@@ -107,6 +114,18 @@ export class WebsocketService {
       .subscribe((message: IMessage) => {
         let move: MoveMessage = JSON.parse(message.body)
         this.moveSubject.next(move);
+      });
+  }
+
+  subscribePlacement(gameId: number) {
+    if(this.rxStomp == undefined) {
+      return;
+    }
+    this.placementQueue = this.rxStomp
+      .watch(`/topic/placement/${gameId}`)
+      .subscribe((message: IMessage) => {
+        let move: PlacementMessage = JSON.parse(message.body)
+        this.placementSubject.next(move);
       });
   }
 
