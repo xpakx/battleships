@@ -75,24 +75,11 @@ export class BoardComponent implements OnInit {
       console.log(board);
     });
 
-    this.moveSub = this.websocket.move$.subscribe((move: MoveMessage) => {
-      this.makeMove(move);
-      console.log(move);
-    });
+    this.moveSub = this.websocket.move$
+    .subscribe((move: MoveMessage) => this.makeMove(move));
 
-    this.placementSub = this.websocket.placement$.subscribe((placement: PlacementMessage) => {
-        let currentUser = localStorage.getItem("username");
-        if (currentUser == placement.player) {
-          if (placement.legal) {
-            this.shipsPlaced = true;
-            this.errorMsg = false;
-          } else {
-            this.myShips = [];
-            this.msg = "Ship placement not legal!";
-            this.errorMsg = true;
-          }
-        }
-    });
+    this.placementSub = this.websocket.placement$
+    .subscribe((placement: PlacementMessage) => this.makePlacement(placement));
   }
 
   ngOnDestroy() {
@@ -211,5 +198,19 @@ export class BoardComponent implements OnInit {
     }
     this.websocket.placeShips(this._gameId, {"ships": this.myShips});
     console.log("sent ships")
+  }
+
+  makePlacement(placement: PlacementMessage) {
+    let currentUser = localStorage.getItem("username");
+    if (currentUser == placement.player) {
+      if (placement.legal) {
+        this.shipsPlaced = true;
+        this.errorMsg = false;
+      } else {
+        this.myShips = [];
+        this.msg = "Ship placement not legal!";
+        this.errorMsg = true;
+      }
+    }
   }
 }
