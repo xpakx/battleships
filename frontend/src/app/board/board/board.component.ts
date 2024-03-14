@@ -46,34 +46,8 @@ export class BoardComponent implements OnInit {
   constructor(private websocket: WebsocketService) { }
 
   ngOnInit(): void {
-    this.boardSub = this.websocket.board$.subscribe((board: BoardMessage) => {
-      if (board.gameStarted) {
-        // TODO: should fetch ships from the game service
-      }
-
-      if (board.error) {
-        this.msg = board.error;
-        this.errorMsg = true;
-      } else {
-        this.myBoard = board.state1;
-        this.game = board;
-
-        let currentUser = localStorage.getItem("username");
-        if (currentUser == board.username1 || currentUser == board.username2) {
-          if (currentUser == board.username1) {
-            this.myBoard = board.state1;
-            this.opponentBoard = board.state2;
-          } else {
-            this.myBoard = board.state2;
-            this.opponentBoard = board.state1;
-          }
-        } else {
-          this.myBoard = board.state1;
-          this.opponentBoard = board.state2;
-        }
-      }
-      console.log(board);
-    });
+    this.boardSub = this.websocket.board$
+    .subscribe((board: BoardMessage) => this.updateBoard(board));
 
     this.moveSub = this.websocket.move$
     .subscribe((move: MoveMessage) => this.makeMove(move));
@@ -210,6 +184,34 @@ export class BoardComponent implements OnInit {
         this.myShips = [];
         this.msg = "Ship placement not legal!";
         this.errorMsg = true;
+      }
+    }
+  }
+
+  updateBoard(board: BoardMessage) {
+    if (board.gameStarted) {
+      // TODO: should fetch ships from the game service
+    }
+
+    if (board.error) {
+      this.msg = board.error;
+      this.errorMsg = true;
+    } else {
+      this.myBoard = board.state1;
+      this.game = board;
+
+      let currentUser = localStorage.getItem("username");
+      if (currentUser == board.username1 || currentUser == board.username2) {
+        if (currentUser == board.username1) {
+          this.myBoard = board.state1;
+          this.opponentBoard = board.state2;
+        } else {
+          this.myBoard = board.state2;
+          this.opponentBoard = board.state1;
+        }
+      } else {
+        this.myBoard = board.state1;
+        this.opponentBoard = board.state2;
       }
     }
   }
