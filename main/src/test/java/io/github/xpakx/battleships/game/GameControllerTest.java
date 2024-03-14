@@ -135,6 +135,66 @@ class GameControllerTest {
                 .body("errors", hasItem(containsStringIgnoringCase("game type cannot be null")));
     }
 
+    @Test
+    void gameRequestShouldHaveRuleSet() {
+        GameRequest request = getGameRequest(GameType.USER, "username", null);
+        given()
+                .contentType(ContentType.JSON)
+                .header(getHeaderForUser("test_user"))
+                .body(request)
+                .when()
+                .post(baseUrl + "/game")
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("message", containsStringIgnoringCase("validation failed"))
+                .body("errors", hasItem(containsStringIgnoringCase("must have a rule set")));
+    }
+
+    @Test
+    void aiGameRequestShouldHaveAIType() {
+        GameRequest request = getGameRequest(GameType.AI, null, GameRuleset.Classic, null);
+        given()
+                .contentType(ContentType.JSON)
+                .header(getHeaderForUser("test_user"))
+                .body(request)
+                .when()
+                .post(baseUrl + "/game")
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("message", containsStringIgnoringCase("validation failed"))
+                .body("errors", hasItem(containsStringIgnoringCase("must have specified ai type")));
+    }
+
+    @Test
+    void aiGameRequestShouldHaveNotNoneAIType() {
+        GameRequest request = getGameRequest(GameType.AI, null, GameRuleset.Classic, AIType.None);
+        given()
+                .contentType(ContentType.JSON)
+                .header(getHeaderForUser("test_user"))
+                .body(request)
+                .when()
+                .post(baseUrl + "/game")
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("message", containsStringIgnoringCase("validation failed"))
+                .body("errors", hasItem(containsStringIgnoringCase("must have specified ai type")));
+    }
+
+    @Test
+    void playerGameRequestShouldNotHaveAIType() {
+        GameRequest request = getGameRequest(GameType.USER, "username", GameRuleset.Classic, AIType.Random);
+        given()
+                .contentType(ContentType.JSON)
+                .header(getHeaderForUser("test_user"))
+                .body(request)
+                .when()
+                .post(baseUrl + "/game")
+                .then()
+                .statusCode(BAD_REQUEST.value())
+                .body("message", containsStringIgnoringCase("validation failed"))
+                .body("errors", hasItem(containsStringIgnoringCase("cannot have ai type")));
+    }
+
     @ParameterizedTest
     @EnumSource(GameType.class)
     void userCreatingGameShouldExist(GameType type) {
@@ -480,11 +540,28 @@ class GameControllerTest {
 
 
     private GameRequest getGameRequest(GameType type, String username) {
+        return getGameRequest(
+                type,
+                username,
+                GameRuleset.Polish,
+                type == GameType.AI ? AIType.Random : null
+                );
+    }
+
+    private GameRequest getGameRequest(GameType type, String username, GameRuleset ruleset) {
+        return getGameRequest(
+                type,
+                username,
+                ruleset,
+                type == GameType.AI ? AIType.Random : null
+        );
+    }
+    private GameRequest getGameRequest(GameType type, String username, GameRuleset ruleset, AIType aiType) {
         var request = new GameRequest();
         request.setOpponent(username);
         request.setType(type);
-        request.setRules(GameRuleset.Polish);
-        request.setAiType(type == GameType.AI ? AIType.Random : null);
+        request.setRules(ruleset);
+        request.setAiType(aiType);
         return request;
     }
 
