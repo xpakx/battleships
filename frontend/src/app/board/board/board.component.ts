@@ -95,16 +95,14 @@ export class BoardComponent implements OnInit {
 
     if (move.finished) {
       this.finished = true;
-      if (move.finished) {
-        console.log(`${move.winner} won!`);
-        if(currentUser == move.winner) {
-          this.msg = "You won!";
-        } else if (currentUser == this.game?.username1 || currentUser == this.game?.username2) {
-          this.msg = "You lost!";
-        } else {
-          this.msg = `${move.winner} won!`;
-        }
-      } 
+      console.log(`${move.winner} won!`);
+      if (currentUser == move.winner) {
+        this.msg = "You won!";
+      } else if (currentUser == this.game?.username1 || currentUser == this.game?.username2) {
+        this.msg = "You lost!";
+      } else {
+        this.msg = `${move.winner} won!`;
+      }
     }
   }
 
@@ -151,68 +149,75 @@ export class BoardComponent implements OnInit {
 
   repaintShips() {
     this.shipsBoard = Array(10).fill(null).map(() => Array(10).fill(""));
-    this.myShips.forEach((ship: Ship) => {
-      if (ship.orientation == "Horizontal") {
-        let row = ship.headX;
-        for (let i = ship.headY; i < ship.headY+ship.size; i++) {
-          this.shipsBoard[row][i] = "ship";
-        }
-      } else {
-        let column = ship.headY;
-        for (let i = ship.headX; i < ship.headX+ship.size; i++) {
-          this.shipsBoard[i][column] = "ship";
-        }
+    this.myShips.forEach((ship: Ship) => this.repaintSingleShip(ship));
+  }
+
+  repaintSingleShip(ship: Ship) {
+    if (ship.orientation == "Horizontal") {
+      let row = ship.headX;
+      for (let i = ship.headY; i < ship.headY + ship.size; i++) {
+        this.shipsBoard[row][i] = "ship";
       }
-    });
+    } else {
+      let column = ship.headY;
+      for (let i = ship.headX; i < ship.headX + ship.size; i++) {
+        this.shipsBoard[i][column] = "ship";
+      }
+    }
   }
 
   sendPlacement() {
     if (this._gameId == undefined) {
       return;
     }
-    this.websocket.placeShips(this._gameId, {"ships": this.myShips});
+    this.websocket.placeShips(this._gameId, { "ships": this.myShips });
     console.log("sent ships")
   }
 
   makePlacement(placement: PlacementMessage) {
     let currentUser = localStorage.getItem("username");
-    if (currentUser == placement.player) {
-      if (placement.legal) {
-        this.shipsPlaced = true;
-        this.errorMsg = false;
-      } else {
-        this.myShips = [];
-        this.msg = "Ship placement not legal!";
-        this.errorMsg = true;
-      }
+    if (currentUser != placement.player) {
+      return;
+    }
+
+    if (placement.legal) {
+      this.shipsPlaced = true;
+      this.errorMsg = false;
+    } else {
+      this.myShips = [];
+      this.msg = "Ship placement not legal!";
+      this.errorMsg = true;
     }
   }
 
   updateBoard(board: BoardMessage) {
     if (board.gameStarted) {
-      // TODO: should fetch ships from the game service
+      this.getShips();
     }
 
     if (board.error) {
       this.msg = board.error;
       this.errorMsg = true;
+      return;
+    }
+
+    this.myBoard = board.state1;
+    this.game = board;
+
+    let currentUser = localStorage.getItem("username");
+    if (currentUser == board.username1) {
+      this.myBoard = board.state1;
+      this.opponentBoard = board.state2;
+    } else if (currentUser == board.username2) {
+      this.myBoard = board.state2;
+      this.opponentBoard = board.state1;
     } else {
       this.myBoard = board.state1;
-      this.game = board;
-
-      let currentUser = localStorage.getItem("username");
-      if (currentUser == board.username1 || currentUser == board.username2) {
-        if (currentUser == board.username1) {
-          this.myBoard = board.state1;
-          this.opponentBoard = board.state2;
-        } else {
-          this.myBoard = board.state2;
-          this.opponentBoard = board.state1;
-        }
-      } else {
-        this.myBoard = board.state1;
-        this.opponentBoard = board.state2;
-      }
+      this.opponentBoard = board.state2;
     }
+  }
+
+  getShips() {
+    // TODO: should fetch ships from the game service
   }
 }
