@@ -39,4 +39,8 @@ export class GameManagementService {
   public acceptRequest(gameId: number, request: AcceptRequest): Observable<Boolean> {
     return this.http.post<Boolean>(`${this.apiUrl}/${gameId}/request`, request, { headers: this.getHeaders() });
   }
+
+  public getGame(gameId: number): Observable<Game> {
+    return this.http.get<Game>(`${this.apiUrl}/${gameId}`, { headers: this.getHeaders() });
+  }
 }

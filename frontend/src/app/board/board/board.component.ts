@@ -6,6 +6,8 @@ import { WebsocketService } from '../websocket.service';
 import { Ship } from 'src/app/main/dto/ship';
 import { Pair } from '../dto/pair';
 import { PlacementMessage } from '../dto/placement-message';
+import { GameManagementService } from 'src/app/main/game-management.service';
+import { Game } from 'src/app/main/dto/game';
 
 @Component({
   selector: 'app-board',
@@ -43,7 +45,7 @@ export class BoardComponent implements OnInit {
     }
   }
 
-  constructor(private websocket: WebsocketService) { }
+  constructor(private websocket: WebsocketService, private gameService: GameManagementService) { }
 
   ngOnInit(): void {
     this.boardSub = this.websocket.board$
@@ -218,6 +220,15 @@ export class BoardComponent implements OnInit {
   }
 
   getShips() {
-    // TODO: should fetch ships from the game service
+    // TODO: error handling, maybe block placement till loaded?
+    if (this._gameId == undefined) {
+      return;
+    }
+    this.gameService.getGame(this._gameId)
+    .subscribe({
+      next: (game: Game) => {
+        this.myShips = game.myShips;
+      }
+    });
   }
 }
