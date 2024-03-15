@@ -22,13 +22,14 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.reset;
 
@@ -141,6 +142,35 @@ class UpdateEventHandlerTest {
         assertThat(gameOpt.get().isWon(), is(true));
         assertThat(gameOpt.get().getUserCurrentState(), equalTo("new state"));
         assertThat(gameOpt.get().getOpponentCurrentState(), equalTo("new opponent state"));
+    }
+
+    @Test
+    public void shouldAddMove() {
+        var opponentId = createUser("opponent");
+        var gameId = createGame(userId, opponentId, false);
+        var game = new UpdateEvent();
+        game.setGameId(gameId);
+        game.setUserCurrentState("new state");
+        game.setOpponentCurrentState("new opponent state");
+        game.setUserShips("{}");
+        game.setOpponentShips("{}");
+        game.setFinished(true);
+        game.setWon(true);
+        game.setLastMoveX(3);
+        game.setLastMoveY(7);
+        game.setTimestamp(LocalDateTime.of(1993, Month.SEPTEMBER, 1, 13, 0));
+        rabbitTemplate.convertAndSend(updateExchange, "update", game);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isMessageConsumed(), Matchers.is(true)); // TODO
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {}
+        var moves = moveRepository.findAll();
+        assertThat(moves, hasSize(1));
+        assertThat(moves.get(0).getRow(), equalTo(3));
+        assertThat(moves.get(0).getColumn(), equalTo(7));
+        assertThat(moves.get(0).getTimestamp(), equalTo(LocalDateTime.of(1993, Month.SEPTEMBER, 1, 13, 0)));
     }
 
     private Callable<Boolean> isMessageConsumed() {
