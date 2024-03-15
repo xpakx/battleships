@@ -538,6 +538,26 @@ class GameControllerTest {
         assertThat(game.isRejected(), is(false));
     }
 
+    @Test
+    void unauthorizedUserShouldNotBeAbleToViewGame() {
+        given()
+                .when()
+                .get(baseUrl + "/game/1")
+                .then()
+                .statusCode(UNAUTHORIZED.value());
+    }
+
+    @Test
+    void gameShouldExist() {
+        given()
+                .header(getHeaderForUser("user"))
+                .when()
+                .get(baseUrl + "/game/1")
+                .then()
+                .statusCode(NOT_FOUND.value())
+                .body("message", containsStringIgnoringCase("game not found"));
+    }
+
 
     private GameRequest getGameRequest(GameType type, String username) {
         return getGameRequest(
