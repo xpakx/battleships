@@ -540,7 +540,7 @@ class GameControllerTest {
         game.setUsername1("user1");
         game.setUsername2("user2");
         game.setFirstUserStarts(false);
-        game.setFirstUserTurn(true);
+        game.setFirstUserTurn(false);
         game.setId(5L);
         game.setUserCurrentState("???|?x?|???");
         game.setOpponentCurrentState("???|?x?|???");
