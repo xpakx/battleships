@@ -13,7 +13,7 @@ import java.util.List;
 public class MoveController {
     private final MoveService moveService;
 
-    @GetMapping("/game/{id}/history")
+    @GetMapping("/game/{gameId}/history")
     public ResponseEntity<List<Move>> getMoves(@PathVariable Long gameId) {
         return ResponseEntity.ok(
                 moveService.getMoveHistory(gameId)
