@@ -558,6 +558,18 @@ class GameControllerTest {
                 .body("message", containsStringIgnoringCase("game not found"));
     }
 
+    @Test
+    void shouldReturnAGame() {
+        var gameId = createGame();
+        given()
+                .header(getHeaderForUser("user"))
+                .when()
+                .get(baseUrl + "/game/{gameId}", gameId)
+                .then()
+                .statusCode(OK.value())
+                .body("id", equalTo(gameId.intValue()));
+    }
+
 
     private GameRequest getGameRequest(GameType type, String username) {
         return getGameRequest(
