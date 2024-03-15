@@ -26,4 +26,5 @@ public class UpdateEvent {
 
     private Integer lastMoveX;
     private Integer lastMoveY;
+    private String lastMovePlayer;
 }

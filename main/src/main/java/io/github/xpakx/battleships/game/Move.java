@@ -33,4 +33,9 @@ public class Move {
     @JoinColumn(name = "game_id", nullable = false)
     @JsonIgnore
     private Game game;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
 }

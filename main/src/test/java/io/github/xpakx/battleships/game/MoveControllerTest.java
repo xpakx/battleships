@@ -157,7 +157,7 @@ class MoveControllerTest {
 
     private void createMove(Long gameId, Integer row, Integer column, LocalDateTime when) {
         Move move = new Move();
-        // move.setUser(userRepository.getReferenceById(userId));
+        move.setUser(userRepository.getReferenceById(userId));
         move.setUserCurrentState("???|???|???");
         move.setOpponentCurrentState("???|???|???");
         move.setRow(row);

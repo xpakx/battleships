@@ -2,6 +2,7 @@ package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.game.dto.UpdateEvent;
 import io.github.xpakx.battleships.game.error.GameNotFoundException;
+import io.github.xpakx.battleships.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public class MoveService {
     private final MoveRepository moveRepository;
     private final GameRepository gameRepository;
+    private final UserRepository userRepository;
 
     public void saveMove(UpdateEvent event) {
         var move = new Move();
@@ -21,6 +23,10 @@ public class MoveService {
         move.setTimestamp(event.getTimestamp());
         move.setUserCurrentState(event.getUserCurrentState());
         move.setOpponentCurrentState(event.getOpponentCurrentState());
+        move.setUser(userRepository
+                        .findByUsername(event.getLastMovePlayer())
+                        .orElse(null)
+        );
         moveRepository.save(move);
     }
 
