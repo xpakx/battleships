@@ -33,6 +33,12 @@ public class GameService {
             return msg;
         }
         var game = gameOpt.get();
+
+        if (!game.isUserInGame(username)) {
+            var msg = MoveMessage.rejected(move.getX(), move.getY(), username, "Cannot move!");
+            simpMessagingTemplate.convertAndSend("/topic/game/" + gameId, msg);
+            return msg;
+        }
         if (!game.isGameStarted()) {
             var msg = MoveMessage.rejected(move.getX(), move.getY(), username, "Game not started, both players must place their ships!");
             simpMessagingTemplate.convertAndSend("/topic/game/" + gameId, msg);
@@ -68,8 +74,7 @@ public class GameService {
     }
 
     private boolean canPlayerMove(GameState game, MoveRequest move, String username) {
-        return game.isUserInGame(username) &&
-                ((username.equals(game.getUsername1()) && game.isFirstUserTurn()) ||
+        return ((username.equals(game.getUsername1()) && game.isFirstUserTurn()) ||
                 (username.equals(game.getUsername2()) && game.isSecondUserTurn()));
     }
 
