@@ -60,6 +60,7 @@ class GameControllerTest {
 
     private CompletableFuture<ChatMessage> completableMessage;
     private CompletableFuture<GameMessage> completableGame;
+    private CompletableFuture<MoveMessage> completableMove;
 
     @Value("${jwt.secret}")
     String secret;
@@ -155,6 +156,7 @@ class GameControllerTest {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         completableMessage = new CompletableFuture<>();
         completableGame = new CompletableFuture<>();
+        completableMove = new CompletableFuture<>();
         if (!rabbitSetupIsDone) {
             config();
         }
@@ -435,6 +437,178 @@ class GameControllerTest {
         assertThat(completableGame.isDone(), is(false));
     }
 
+    @Test
+    void shouldNotApplyMovesByUserNotInGame() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/game/5", new MoveFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        gameRepository.save(game);
+        var msg = new MoveRequest();
+        msg.setX(0);
+        msg.setY(0);
+        session.send("/app/move/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        MoveMessage moveMessage = completableMove.get(1, SECONDS);
+        assertThat(moveMessage, notNullValue());
+        assertThat(moveMessage.isLegal(), is(false));
+        assertThat(moveMessage.getMessage(), containsStringIgnoringCase("cannot move"));
+    }
+
+    @Test
+    void shouldNotApplyMoveInWrongTurn() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/game/5", new MoveFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(false);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setOpponentShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        gameRepository.save(game);
+        var msg = new MoveRequest();
+        msg.setX(0);
+        msg.setY(0);
+        session.send("/app/move/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        MoveMessage moveMessage = completableMove.get(1, SECONDS);
+        assertThat(moveMessage, notNullValue());
+        assertThat(moveMessage.isLegal(), is(false));
+        assertThat(moveMessage.getMessage(), containsStringIgnoringCase("cannot move"));
+    }
+
+    @Test
+    void shouldSendMovesFromEngineToUsers() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/game/5", new MoveFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(false);
+        game.setFirstUserTurn(true);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        gameRepository.save(game);
+
+        var event = new EngineMoveEvent();
+        event.setGameId(5L);
+        event.setLegal(true);
+        event.setColumn(0);
+        event.setRow(0);
+        event.setNewState("X????????");
+        rabbitTemplate.convertAndSend(engineExchange, "validation.move", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        MoveMessage moveMessage = completableMove.get(1, SECONDS);
+        assertThat(moveMessage, notNullValue());
+        assertThat(moveMessage.isLegal(), is(true));
+        assertThat(moveMessage.getX(), equalTo(0));
+        assertThat(moveMessage.getY(), equalTo(0));
+        assertThat(moveMessage.getPlayer(), equalTo("user2"));
+    }
+
+    @Test
+    void shouldSendMoveEventToRabbitMq() throws Exception {
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(true);
+        game.setFirstUserTurn(true);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setOpponentShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        gameRepository.save(game);
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+
+        var move = new MoveRequest();
+        move.setX(0);
+        move.setY(0);
+        session.send("/app/move/5", move);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isQueueNotEmpty("test.move.queue"), Matchers.is(true));
+        var msg = getMoveMessage();
+        assert(msg.isPresent());
+        var event = msg.get();
+        assertThat(event.getGameId(), equalTo(5L));
+        assertThat(event.getRow(), equalTo(0));
+        assertThat(event.getColumn(), equalTo(0));
+        assertThat(event.getGameState(), equalTo("???|?x?|???"));
+    }
+
     private class ChatFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
@@ -509,6 +683,39 @@ class GameControllerTest {
             return Optional.empty();
         }
         if (queuedMessage instanceof GameEvent e) {
+            return Optional.of(e);
+        }
+        return Optional.empty();
+    }
+
+
+
+    private class MoveFrameHandler implements StompFrameHandler {
+        private final CountDownLatch latch;
+
+        public MoveFrameHandler(CountDownLatch latch) {
+            this.latch = latch;
+        }
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return MoveMessage.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            completableMove.complete((MoveMessage) payload);
+            latch.countDown();
+        }
+
+    }
+
+
+    private Optional<MoveEvent> getMoveMessage() {
+        var queuedMessage = rabbitTemplate.receiveAndConvert("test.move.queue");
+        if (Objects.isNull(queuedMessage)) {
+            return Optional.empty();
+        }
+        if (queuedMessage instanceof MoveEvent e) {
             return Optional.of(e);
         }
         return Optional.empty();
