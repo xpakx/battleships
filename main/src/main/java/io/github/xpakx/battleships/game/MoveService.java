@@ -1,6 +1,7 @@
 package io.github.xpakx.battleships.game;
 
 import io.github.xpakx.battleships.game.dto.UpdateEvent;
+import io.github.xpakx.battleships.game.error.GameNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,10 @@ public class MoveService {
     }
 
     public List<Move> getMoveHistory(Long gameId) {
-        return moveRepository.findByGame_IdOrderByTimestampAsc(gameId);
+        if (!gameRepository.existsById(gameId)) {
+            throw new GameNotFoundException();
+        }
+        return moveRepository.findByGameIdOrderByTimestampAsc(gameId);
     }
 
 }
