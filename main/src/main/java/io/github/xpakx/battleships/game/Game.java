@@ -30,9 +30,9 @@ public class Game {
     private boolean lost;
     private boolean drawn;
 
-    @Column(columnDefinition = "TIME")
+    @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime startedAt;
-    @Column(columnDefinition = "TIME")
+    @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime lastMoveAt;
 
     // ?=empty, .=hit, x=sunk, o=miss, |=end of row

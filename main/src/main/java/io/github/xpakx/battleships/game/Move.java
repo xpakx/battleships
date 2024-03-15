@@ -26,7 +26,7 @@ public class Move {
     private String userCurrentState;
     private String opponentCurrentState;
 
-    @Column(columnDefinition = "TIME")
+    @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
