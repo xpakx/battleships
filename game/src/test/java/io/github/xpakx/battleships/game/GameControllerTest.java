@@ -59,6 +59,7 @@ class GameControllerTest {
     WebSocketStompClient stompClient;
 
     private CompletableFuture<ChatMessage> completableMessage;
+    private CompletableFuture<GameMessage> completableGame;
 
     @Value("${jwt.secret}")
     String secret;
@@ -153,6 +154,7 @@ class GameControllerTest {
         );
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         completableMessage = new CompletableFuture<>();
+        completableGame = new CompletableFuture<>();
         if (!rabbitSetupIsDone) {
             config();
         }
@@ -253,6 +255,186 @@ class GameControllerTest {
         assertThat(chatMessage.getPlayer(), equalTo("test_user"));
     }
 
+    @Test
+    void shouldSendGameOnSubscription() throws Exception {
+        GameState game = new GameState();
+        game.setId(1L);
+        game.setUsername1("test_user");
+        game.setUsername2("user2");
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        gameRepository.save(game);
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        CountDownLatch latch = new CountDownLatch(1);
+        session.subscribe("/app/board/1", new BoardFrameHandler(latch));
+        await()
+                .atMost(1, SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        GameMessage gameMessage = completableGame.get(1, SECONDS);
+        assertThat(gameMessage, notNullValue());
+        assertThat(gameMessage.getUsername2(), equalTo("user2"));
+    }
+
+    @Test
+    void shouldSendErrorOnSubscriptionIfGameIsNotLoaded() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        CountDownLatch latch = new CountDownLatch(1);
+        session.subscribe("/app/board/1", new BoardFrameHandler(latch));
+        await()
+                .atMost(1, SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        GameMessage gameMessage = completableGame.get(1, SECONDS);
+        assertThat(gameMessage, notNullValue());
+        assertThat(gameMessage.getError(), notNullValue());
+        assertThat(gameMessage.getError(), containsStringIgnoringCase("loading game"));
+    }
+
+    @Test
+    void shouldSendEventToRabbitMqOnSubscriptionIfGameIsNotLoaded() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        session.subscribe("/app/board/5", new BoardFrameHandler(new CountDownLatch(1)));
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isQueueNotEmpty("test.queue"), Matchers.is(true));
+        var msg = getGameMessage();
+        assert(msg.isPresent());
+        var event = msg.get();
+        assertThat(event.getGameId(), equalTo(5L));
+    }
+
+    @Test
+    void shouldSendBoardMessageOnEventFromRabbitMq() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/board/5", new BoardFrameHandler(latch));
+        var event = new StateEvent();
+        event.setId(5L);
+        event.setUsername1("user1");
+        event.setUsername2("user2");
+        event.setUserCurrentState("???|?x?|???");
+        event.setOpponentCurrentState("???|?x?|???");
+        event.setUserShips("[]");
+        event.setOpponentShips("[]");
+        rabbitTemplate.convertAndSend(stateExchange, "state", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        GameMessage gameMessage = completableGame.get(1, SECONDS);
+        assertThat(gameMessage, notNullValue());
+        assertThat(gameMessage.getError(), nullValue());
+        assertThat(gameMessage.getUsername1(), equalTo("user1"));
+        assertThat(gameMessage.getUsername2(), equalTo("user2"));
+    }
+
+    @Test
+    void shouldSendErrorOnEventFromRabbitMq() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/board/5", new BoardFrameHandler(latch));
+        var event = new StateEvent();
+        event.setId(5L);
+        event.setError(true);
+        event.setErrorMessage("Error");
+        rabbitTemplate.convertAndSend(stateExchange, "state", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        GameMessage gameMessage = completableGame.get(1, SECONDS);
+        assertThat(gameMessage, notNullValue());
+        assertThat(gameMessage.getError(), notNullValue());
+        assertThat(gameMessage.getError(), equalTo("Error"));
+    }
+
+    @Test
+    void shouldNotSendEventsAboutOtherGames() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/board/5", new BoardFrameHandler(latch));
+        var event = new StateEvent();
+        event.setId(1L);
+        event.setUsername1("user1");
+        event.setUsername2("user2");
+        event.setUserCurrentState("???|?x?|???");
+        event.setOpponentCurrentState("???|?x?|???");
+        rabbitTemplate.convertAndSend(stateExchange, "state", event);
+        Thread.sleep(1000);
+        assertThat(completableGame.isDone(), is(false));
+    }
+
     private class ChatFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
@@ -286,5 +468,49 @@ class GameControllerTest {
                 .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
+    }
+
+
+    private class BoardFrameHandler implements StompFrameHandler {
+        private final CountDownLatch latch;
+
+        public BoardFrameHandler(CountDownLatch latch) {
+            this.latch = latch;
+        }
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return GameMessage.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            completableGame.complete((GameMessage) payload);
+            latch.countDown();
+        }
+
+    }
+
+    private int getMessageCount(String queueName) {
+        Properties queueProperties = rabbitAdmin.getQueueProperties(queueName);
+        if (queueProperties != null) {
+            return (int) queueProperties.get("QUEUE_MESSAGE_COUNT");
+        } else {
+            return 0;
+        }
+    }
+
+    private Callable<Boolean> isQueueNotEmpty(String queueName) {
+        return () -> getMessageCount(queueName) > 0;
+    }
+
+    private Optional<GameEvent> getGameMessage() {
+        var queuedMessage = rabbitTemplate.receiveAndConvert("test.queue");
+        if (Objects.isNull(queuedMessage)) {
+            return Optional.empty();
+        }
+        if (queuedMessage instanceof GameEvent e) {
+            return Optional.of(e);
+        }
+        return Optional.empty();
     }
 }
