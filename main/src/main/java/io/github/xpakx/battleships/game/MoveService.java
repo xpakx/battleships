@@ -16,6 +16,11 @@ public class MoveService {
     private final UserRepository userRepository;
 
     public void saveMove(UpdateEvent event) {
+        var gameOpt = gameRepository.findWithUsersById(event.getGameId());
+        if (gameOpt.isEmpty()) {
+            return;
+        }
+        var game = gameOpt.get();
         var move = new Move();
         move.setGame(gameRepository.getReferenceById(event.getGameId()));
         move.setRow(event.getLastMoveX());
@@ -23,10 +28,11 @@ public class MoveService {
         move.setTimestamp(event.getTimestamp());
         move.setUserCurrentState(event.getUserCurrentState());
         move.setOpponentCurrentState(event.getOpponentCurrentState());
-        move.setUser(userRepository
-                        .findByUsername(event.getLastMovePlayer())
-                        .orElse(null)
-        );
+        if (event.isUserTurn()) {
+            move.setUser(game.getUser());
+        } else {
+            move.setUser(game.getOpponent());
+        }
         moveRepository.save(move);
     }
 
