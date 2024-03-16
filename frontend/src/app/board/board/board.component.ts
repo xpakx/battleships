@@ -116,7 +116,12 @@ export class BoardComponent implements OnInit {
       return;
     }
 
-    // TODO: delete ship if field is occupied
+    let clicked = this.getClickedShip(row, column);
+    if (clicked) {
+      this.myShips = this.myShips.filter((a) => a != clicked);
+      this.head = undefined;
+      return;
+    }
 
     if (this.head) {
       if (this.head.column != column && this.head.row != row) {
@@ -165,6 +170,20 @@ export class BoardComponent implements OnInit {
       for (let i = ship.headX; i < ship.headX + ship.size; i++) {
         this.shipsBoard[i][column] = "ship";
       }
+    }
+  }
+
+  getClickedShip(row: number, column: number): Ship | undefined {
+    return this.myShips.find((ship: Ship) => this.testIfShipIsClicked(ship, row, column));
+  }
+
+  testIfShipIsClicked(ship: Ship, row: number, column: number): boolean {
+    if (ship.orientation == "Horizontal") {
+      let shipRow = ship.headX;
+      return (row == shipRow && ship.headY <= column && ship.headY + ship.size - 1 <= column) 
+    } else {
+      let shipColumn = ship.headY;
+      return (column == shipColumn && ship.headX <= row && ship.headX + ship.size - 1 <= row) 
     }
   }
 
