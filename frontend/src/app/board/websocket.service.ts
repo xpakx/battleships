@@ -68,7 +68,7 @@ export class WebsocketService {
 
     console.log("activating");
     this.rxStomp.activate();
-    this.connected = true; // TODO
+    this.connected = true;
   }
 
   makeMove(gameId: number, move: MoveRequest) {
