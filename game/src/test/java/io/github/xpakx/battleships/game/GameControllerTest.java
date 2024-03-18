@@ -735,6 +735,89 @@ class GameControllerTest {
         assertThat(placementMessage.getPlayer(), equalTo("test_user"));
     }
 
+    @Test
+    void shouldNotApplyPlacementIfShipsAreAlreadyPlaced() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/placement/5", new PlacementFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setOpponentShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setFirstUserTurn(true);
+        game.setFirstUserStarts(true);
+        gameRepository.save(game);
+        var msg = new PlacementRequest();
+        msg.setShips(List.of(new Ship()));
+        session.send("/app/placement/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        var placementMsg = completablePlacement.get(1, SECONDS);
+        assertThat(placementMsg, notNullValue());
+        assertThat(placementMsg.isLegal(), is(false));
+        assertThat(placementMsg.getPlayer(), equalTo("user1"));
+    }
+
+    @Test
+    void shouldNotApplyPlacementIfGameIsFinished() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/placement/5", new PlacementFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        game.setFirstUserTurn(true);
+        game.setFirstUserStarts(true);
+        game.setFinished(true);
+        gameRepository.save(game);
+        var msg = new PlacementRequest();
+        msg.setShips(List.of(new Ship()));
+        session.send("/app/placement/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        var placementMsg = completablePlacement.get(1, SECONDS);
+        assertThat(placementMsg, notNullValue());
+        assertThat(placementMsg.isLegal(), is(false));
+        assertThat(placementMsg.getPlayer(), equalTo("user1"));
+    }
+
     private class ChatFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
