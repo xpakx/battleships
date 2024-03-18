@@ -223,6 +223,16 @@ public class GameService {
             simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
             return msg;
         }
+        if (game.getUsername1().equals(username) && !game.getUserShips().equals("[]")) {
+            var msg = PlacementMessage.rejected(username);
+            simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
+            return msg;
+        }
+        if (game.getUsername2().equals(username) && !game.getOpponentShips().equals("[]")) {
+            var msg = PlacementMessage.rejected(username);
+            simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
+            return msg;
+        }
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
