@@ -66,8 +66,15 @@ public class GameService {
     }
 
     private String createEmptyGameState(int width, int height) {
-        var row = "?".repeat(width) + "|";
-        return row.repeat(height);
+        var row = "?".repeat(width);
+        var builder = new StringBuilder();
+        for (int i=0; i < height; i++) {
+            builder.append(row);
+            if (i < height - 1) {
+                builder.append("|");
+            }
+        }
+        return builder.toString();
     }
 
     public List<GameSummary> getRequests(String username) {
