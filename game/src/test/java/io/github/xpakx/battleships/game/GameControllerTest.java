@@ -818,6 +818,36 @@ class GameControllerTest {
         assertThat(placementMsg.getPlayer(), equalTo("user1"));
     }
 
+    @Test
+    void shouldNotApplyPlacementIfGameIsNotLoaded() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/placement/5", new PlacementFrameHandler(latch));
+        Thread.sleep(100);
+        var msg = new PlacementRequest();
+        msg.setShips(List.of(new Ship()));
+        session.send("/app/placement/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        var placementMsg = completablePlacement.get(1, SECONDS);
+        assertThat(placementMsg, notNullValue());
+        assertThat(placementMsg.isLegal(), is(false));
+        assertThat(placementMsg.getPlayer(), equalTo("user1"));
+    }
+
     private class ChatFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
