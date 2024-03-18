@@ -3,6 +3,7 @@ package io.github.xpakx.battleships.game;
 import com.redis.testcontainers.RedisContainer;
 import io.github.xpakx.battleships.clients.event.GameEvent;
 import io.github.xpakx.battleships.clients.event.MoveEvent;
+import io.github.xpakx.battleships.clients.event.PlacementEvent;
 import io.github.xpakx.battleships.game.dto.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -61,6 +62,7 @@ class GameControllerTest {
     private CompletableFuture<ChatMessage> completableMessage;
     private CompletableFuture<GameMessage> completableGame;
     private CompletableFuture<MoveMessage> completableMove;
+    private CompletableFuture<PlacementMessage> completablePlacement;
 
     @Value("${jwt.secret}")
     String secret;
@@ -157,6 +159,7 @@ class GameControllerTest {
         completableMessage = new CompletableFuture<>();
         completableGame = new CompletableFuture<>();
         completableMove = new CompletableFuture<>();
+        completablePlacement = new CompletableFuture<>();
         if (!rabbitSetupIsDone) {
             config();
         }
@@ -693,6 +696,45 @@ class GameControllerTest {
         assertThat(event.getGameState(), equalTo("???|?x?|???"));
     }
 
+    @Test
+    void shouldNotApplyPlacementByUserNotInGame() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("test_user"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/placement/5", new PlacementFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        gameRepository.save(game);
+        var msg = new PlacementRequest();
+        msg.setShips(List.of(new Ship()));
+        session.send("/app/placement/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        var placementMessage = completablePlacement.get(1, SECONDS);
+        assertThat(placementMessage, notNullValue());
+        assertThat(placementMessage.isLegal(), is(false));
+        assertThat(placementMessage.getPlayer(), equalTo("test_user"));
+    }
+
     private class ChatFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
@@ -793,7 +835,6 @@ class GameControllerTest {
 
     }
 
-
     private Optional<MoveEvent> getMoveMessage() {
         var queuedMessage = rabbitTemplate.receiveAndConvert("test.move.queue");
         if (Objects.isNull(queuedMessage)) {
@@ -803,5 +844,24 @@ class GameControllerTest {
             return Optional.of(e);
         }
         return Optional.empty();
+    }
+
+    private class PlacementFrameHandler implements StompFrameHandler {
+        private final CountDownLatch latch;
+
+        public PlacementFrameHandler(CountDownLatch latch) {
+            this.latch = latch;
+        }
+        @Override
+        public Type getPayloadType(StompHeaders headers) {
+            return PlacementMessage.class;
+        }
+
+        @Override
+        public void handleFrame(StompHeaders headers, Object payload) {
+            completablePlacement.complete((PlacementMessage) payload);
+            latch.countDown();
+        }
+
     }
 }
