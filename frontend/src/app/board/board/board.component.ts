@@ -36,10 +36,8 @@ export class BoardComponent implements OnInit {
 
   @Input() set gameId(value: number | undefined) {
     this._gameId = value;
-    console.log(value);
     this.finished = false;
     if (this._gameId) {
-      console.log("calling websocket");
       this.websocket.connect();
       this.websocket.subscribeGame(this._gameId);
     }
@@ -71,7 +69,6 @@ export class BoardComponent implements OnInit {
       return;
     }
     this.websocket.makeMove(this._gameId, { x: row, y: column });
-    console.log(row, ", ", column)
   }
 
   makeMove(move: MoveMessage) {
@@ -97,7 +94,6 @@ export class BoardComponent implements OnInit {
 
     if (move.finished) {
       this.finished = true;
-      console.log(`${move.winner} won!`);
       if (currentUser == move.winner) {
         this.msg = "You won!";
       } else if (currentUser == this.game?.username1 || currentUser == this.game?.username2) {
@@ -126,7 +122,6 @@ export class BoardComponent implements OnInit {
 
     if (this.head) {
       if (this.head.column != column && this.head.row != row) {
-        console.log("bad size")
         this.head = undefined;
         return;
       }
@@ -149,7 +144,6 @@ export class BoardComponent implements OnInit {
       }
       this.myShips.push(ship);
       this.head = undefined;
-      console.log(this.myShips)
       this.repaintShips();
     } else {
       this.head = { "row": row, "column": column };
@@ -194,7 +188,6 @@ export class BoardComponent implements OnInit {
       return;
     }
     this.websocket.placeShips(this._gameId, { "ships": this.myShips });
-    console.log("sent ships")
   }
 
   makePlacement(placement: PlacementMessage) {
@@ -210,12 +203,15 @@ export class BoardComponent implements OnInit {
       this.myShips = [];
       this.msg = "Ship placement not legal!";
       this.errorMsg = true;
+      this.repaintShips();
     }
   }
 
   updateBoard(board: BoardMessage) {
     if (board.gameStarted) {
       this.getShips();
+    } else {
+      this.shipsPlaced = false;
     }
 
     if (board.error) {
@@ -224,7 +220,6 @@ export class BoardComponent implements OnInit {
       return;
     }
 
-    this.myBoard = board.state1;
     this.game = board;
 
     let currentUser = localStorage.getItem("username");
@@ -249,6 +244,9 @@ export class BoardComponent implements OnInit {
     .subscribe({
       next: (game: Game) => {
         this.myShips = game.myShips;
+        if (this.myShips.length > 0) {
+          this.shipsPlaced = true;
+        }
       }
     });
   }
