@@ -3,7 +3,7 @@ use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer
 use serde::{Serialize, Deserialize};
 use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}, get_ship_sizes, RuleSet};
 
-use super::ai_client::{ShipMsg, ReqRuleSet, to_board_definition};
+use super::ai_client::{ShipMsg, ReqRuleSet, to_board_definition, to_rule_set};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -105,7 +105,7 @@ fn process_placement_event(game_msg: &PlacementMessage) -> EngineEvent {
         },
     }).collect();
     let board_definition = to_board_definition(&game_msg.ruleset);
-    let sizes = get_ship_sizes(RuleSet::Polish);
+    let sizes = get_ship_sizes(to_rule_set(&game_msg.ruleset));
     let correct = check_ship_placement(&board_definition, &ships);
     let on_board = check_ships_are_on_board(&board_definition, &ships);
     let all = check_all_ships_are_placed(&ships, sizes);

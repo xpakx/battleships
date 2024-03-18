@@ -157,10 +157,17 @@ pub fn to_board_definition(rules: &ReqRuleSet) -> BoardDefinition {
     }
 }
 
+pub fn to_rule_set(rules: &ReqRuleSet) -> RuleSet {
+    match rules {
+        ReqRuleSet::Polish => RuleSet::Polish,
+        ReqRuleSet::Classic => RuleSet::Classic,
+    }
+}
+
 fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
     let mut engine = to_engine(&game_msg.ai_type);
     let board_definition = to_board_definition(&game_msg.ruleset);
-    let sizes = get_ship_sizes(RuleSet::Polish);
+    let sizes = get_ship_sizes(to_rule_set(&game_msg.ruleset));
     let ships: Vec<ShipMsg> = engine
         .place_ships(&board_definition, sizes)
         .iter()
