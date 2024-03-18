@@ -2,7 +2,9 @@ package io.github.xpakx.battleships.game;
 
 import com.redis.testcontainers.RedisContainer;
 import io.github.xpakx.battleships.clients.event.AIEvent;
+import io.github.xpakx.battleships.clients.event.MoveEvent;
 import io.github.xpakx.battleships.clients.event.Phase;
+import io.github.xpakx.battleships.game.dto.EngineAIMoveEvent;
 import io.github.xpakx.battleships.game.dto.EngineMoveEvent;
 import io.github.xpakx.battleships.game.dto.EnginePlacementEvent;
 import io.github.xpakx.battleships.game.dto.StateEvent;
@@ -100,6 +102,17 @@ class EngineEventHandlerTest {
                 null
         );
         rabbitAdmin.declareBinding(binding);
+
+        var queue2 = new Queue("test.move.queue", true);
+        rabbitAdmin.declareQueue(queue2);
+        Binding binding2 = new Binding(
+                "test.move.queue",
+                Binding.DestinationType.QUEUE,
+                movesExchange,
+                "move",
+                null
+        );
+        rabbitAdmin.declareBinding(binding2);
         rabbitSetupIsDone = true;
     }
     @BeforeEach
@@ -114,6 +127,7 @@ class EngineEventHandlerTest {
         rabbitAdmin.purgeQueue(engineMovesQueue);
         rabbitAdmin.purgeQueue(stateQueue);
         rabbitAdmin.purgeQueue("test.queue");
+        rabbitAdmin.purgeQueue("test.move.queue");
         gameRepository.deleteAll();
     }
 
@@ -229,6 +243,39 @@ class EngineEventHandlerTest {
         assertThat(aiEvent.getPhase(), equalTo(Phase.Move));
     }
 
+    @Test
+    void shouldResendAIMoveForValidation() {
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(false);
+        game.setFirstUserTurn(false);
+        game.setUser2AI(true);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?xx|???");
+        game.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setOpponentShips("[{\"headX\":7,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        gameRepository.save(game);
+
+        var event = new EngineAIMoveEvent();
+        event.setGameId(5L);
+        event.setColumn(7);
+        event.setRow(5);
+        rabbitTemplate.convertAndSend(engineExchange, "ai.move", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isQueueNotEmpty("test.move.queue"), Matchers.is(true));
+        var moveMsg = getMoveEvent();
+        assert(moveMsg.isPresent());
+        var moveEvent = moveMsg.get();
+        assertThat(moveEvent.getGameId(), equalTo(5L));
+        assertThat(moveEvent.getColumn(), equalTo(7));
+        assertThat(moveEvent.getRow(), equalTo(5));
+        assertThat(moveEvent.getGameState(), equalTo(game.getCurrentState()));
+        assertThat(moveEvent.getTargets(), equalTo(game.getUserShips()));
+    }
+
     private boolean recordHasNewState(Long id, String newState) {
         var gameOpt = gameRepository.findById(id);
         return gameOpt
@@ -255,6 +302,17 @@ class EngineEventHandlerTest {
             return Optional.empty();
         }
         if (queuedMessage instanceof AIEvent e) {
+            return Optional.of(e);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<MoveEvent> getMoveEvent() {
+        var queuedMessage = rabbitTemplate.receiveAndConvert("test.move.queue");
+        if (Objects.isNull(queuedMessage)) {
+            return Optional.empty();
+        }
+        if (queuedMessage instanceof MoveEvent e) {
             return Optional.of(e);
         }
         return Optional.empty();
