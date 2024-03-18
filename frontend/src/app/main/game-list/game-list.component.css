@@ -1,0 +1,29 @@
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+ul li div {
+    margin-top: 5px;
+    font-style: italic;
+}
+
+ul li button {
+    margin-top: 5px;
+    background-color: #0077cc;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+ul li button:hover {
+    background-color: #005faa;
+}
