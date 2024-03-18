@@ -25,7 +25,8 @@ pub fn set_delegate(consumer: Consumer, channel: Channel) {
                 let move_msg: PlacementMessage = match serde_json::from_str(message) {
                     Ok(msg) => msg,
                     Err(err) => {
-                        println!("Failed to deserialize move message: {:?}", err);
+                        println!("Failed to deserialize placement message: {:?}", err);
+                        println!("{:?}", message);
                         return;
                     }
                 };

@@ -23,7 +23,8 @@ pub fn set_delegate(consumer: Consumer, channel: Channel) {
                 let move_msg: AIMessage = match serde_json::from_str(message) {
                     Ok(msg) => msg,
                     Err(err) => {
-                        println!("Failed to deserialize move message: {:?}", err);
+                        println!("Failed to deserialize ai message: {:?}", err);
+                        println!("{:?}", message);
                         return;
                     }
                 };
@@ -180,7 +181,7 @@ fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
     EnginePlacementEvent {
         game_id: game_msg.game_id,
         ships,
-        first_user: true, //TODO
+        first_user: false,
         legal: true,
         malformed: None,
     }

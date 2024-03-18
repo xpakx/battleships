@@ -8,7 +8,7 @@ const EXCHANGE_NAME: &str = "battleships.moves.topic";
 const MOVES_QUEUE: &str = "battleships.moves.queue";
 const PLACEMENT_QUEUE: &str = "battleships.moves.placement.queue";
 const AI_QUEUE: &str = "battleships.moves.ai.queue";
-pub const DESTINATION_EXCHANGE: &str = "battleships.engine.topic"; // TODO
+pub const DESTINATION_EXCHANGE: &str = "battleships.engine.topic";
 
 pub async fn consumer(rabbit_uri: &str) -> Result<(), lapin::Error> {
     println!("{}", rabbit_uri);
