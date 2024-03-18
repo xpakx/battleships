@@ -72,15 +72,13 @@ export class BoardComponent implements OnInit {
   }
 
   makeMove(move: MoveMessage) {
-    this.error = [["", "", ""], ["", "", ""], ["", "", ""]]; // FIXME
-    if (!move.applied) {
-      if (!move.legal) {
-        this.error[move.x][move.y] = "illegal";
-      }
+    this.error = Array(10).fill(Array(10).fill(""));
+    if (!move.legal) {
+      this.error[move.x][move.y] = "illegal";
       return;
     }
     let currentUser = localStorage.getItem("username");
-    if  (currentUser == this.game?.username1 || currentUser == this.game?.username2) {
+    if (currentUser == this.game?.username1 || currentUser == this.game?.username2) {
       if (currentUser == move.player) {
         this.opponentBoard[move.x][move.y] = move.result;
       } else {
