@@ -3,7 +3,9 @@ package io.github.xpakx.battleships.game;
 import com.redis.testcontainers.RedisContainer;
 import io.github.xpakx.battleships.clients.event.AIEvent;
 import io.github.xpakx.battleships.clients.event.MoveEvent;
+import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.game.dto.EngineMoveEvent;
+import io.github.xpakx.battleships.game.dto.StateEvent;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,6 +79,11 @@ class EngineEventHandlerTest {
     @Value("${amqp.queue.validation.moves}")
     String engineMovesQueue;
 
+    @Value("${amqp.exchange.state}")
+    String stateExchange;
+    @Value("${amqp.queue.state}")
+    String stateQueue;
+
     void config() {
         var queue = new Queue("test.queue", true);
         rabbitAdmin.declareQueue(queue);
@@ -105,6 +112,7 @@ class EngineEventHandlerTest {
     @AfterEach
     void tearDown() {
         rabbitAdmin.purgeQueue(engineMovesQueue);
+        rabbitAdmin.purgeQueue(stateQueue);
         rabbitAdmin.purgeQueue("test.queue");
         gameRepository.deleteAll();
     }
@@ -166,6 +174,27 @@ class EngineEventHandlerTest {
         assertThat(moveOpt.isPresent(), is(true));
         var move = moveOpt.get();
         assertThat(move.getGameState(), equalTo("???|?xx|???"));
+    }
+
+    @Test
+    void shouldAskForAIPlacement() {
+        var event = new StateEvent();
+        event.setId(5L);
+        event.setUsername1("user1");
+        event.setUser2AI(true);
+        event.setFirstUserStarts(false);
+        event.setUserCurrentState("???|?x?|???");
+        event.setOpponentCurrentState("???|?x?|???");
+        event.setUserShips("[]");
+        event.setOpponentShips("[]");
+        rabbitTemplate.convertAndSend(stateExchange, "state", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isQueueNotEmpty("test.queue"), Matchers.is(true));
+        var moveOpt = getAIMessage();
+        assertThat(moveOpt.isPresent(), is(true));
+        var move = moveOpt.get();
+        assertThat(move.getPhase(), equalTo(Phase.Placement));
     }
 
     private boolean recordHasNewState(Long id, String newState) {
