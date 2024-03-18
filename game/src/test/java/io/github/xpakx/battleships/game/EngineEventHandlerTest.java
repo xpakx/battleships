@@ -2,9 +2,9 @@ package io.github.xpakx.battleships.game;
 
 import com.redis.testcontainers.RedisContainer;
 import io.github.xpakx.battleships.clients.event.AIEvent;
-import io.github.xpakx.battleships.clients.event.MoveEvent;
 import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.game.dto.EngineMoveEvent;
+import io.github.xpakx.battleships.game.dto.EnginePlacementEvent;
 import io.github.xpakx.battleships.game.dto.StateEvent;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -174,6 +174,7 @@ class EngineEventHandlerTest {
         assertThat(moveOpt.isPresent(), is(true));
         var move = moveOpt.get();
         assertThat(move.getGameState(), equalTo("???|?xx|???"));
+        assertThat(move.getPhase(), equalTo(Phase.Move));
     }
 
     @Test
@@ -195,6 +196,37 @@ class EngineEventHandlerTest {
         assertThat(moveOpt.isPresent(), is(true));
         var move = moveOpt.get();
         assertThat(move.getPhase(), equalTo(Phase.Placement));
+    }
+
+    @Test
+    void shouldAskAIForMoveAfterPlacementIsFinished() {
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(false);
+        game.setFirstUserTurn(false);
+        game.setUser2AI(true);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        gameRepository.save(game);
+
+        var event = new EnginePlacementEvent();
+        event.setGameId(5L);
+        event.setLegal(true);
+        event.setShips("[{\\\"headX\\\":8,\\\"headY\\\":6,\\\"size\\\":1,\\\"orientation\\\":\\\"Horizontal\\\"}]");
+        event.setFirstUser(true);
+        rabbitTemplate.convertAndSend(engineExchange, "placement", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isQueueNotEmpty("test.queue"), Matchers.is(true));
+        var aiMessage = getAIMessage();
+        assert(aiMessage.isPresent());
+        var aiEvent = aiMessage.get();
+        assertThat(aiEvent.getGameId(), equalTo(5L));
+        assertThat(aiEvent.getPhase(), equalTo(Phase.Move));
     }
 
     private boolean recordHasNewState(Long id, String newState) {

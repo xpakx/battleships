@@ -1071,8 +1071,6 @@ class GameControllerTest {
         return Optional.empty();
     }
 
-
-
     private class MoveFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
