@@ -478,6 +478,90 @@ class GameControllerTest {
     }
 
     @Test
+    void shouldNotApplyMoveIfShipsAreNotPlaced() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/game/5", new MoveFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setOpponentShips("[]");
+        game.setFirstUserTurn(true);
+        game.setFirstUserStarts(true);
+        gameRepository.save(game);
+        var msg = new MoveRequest();
+        msg.setX(0);
+        msg.setY(0);
+        session.send("/app/move/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        MoveMessage moveMessage = completableMove.get(1, SECONDS);
+        assertThat(moveMessage, notNullValue());
+        assertThat(moveMessage.isLegal(), is(false));
+        assertThat(moveMessage.getMessage(), containsStringIgnoringCase("game not started"));
+    }
+
+    @Test
+    void shouldNotApplyMoveBeforeBothPlayersPlaceShips() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/game/5", new MoveFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        game.setFirstUserTurn(true);
+        game.setFirstUserStarts(true);
+        gameRepository.save(game);
+        var msg = new MoveRequest();
+        msg.setX(0);
+        msg.setY(0);
+        session.send("/app/move/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        MoveMessage moveMessage = completableMove.get(1, SECONDS);
+        assertThat(moveMessage, notNullValue());
+        assertThat(moveMessage.isLegal(), is(false));
+        assertThat(moveMessage.getMessage(), containsStringIgnoringCase("game not started"));
+    }
+
+    @Test
     void shouldNotApplyMoveInWrongTurn() throws Exception {
         StompHeaders stompHeaders = new StompHeaders();
         stompHeaders.add("Token", generateToken("user1"));
