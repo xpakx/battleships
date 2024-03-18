@@ -238,7 +238,7 @@ public class GameService {
         try {
             String shipsString = objectMapper.writeValueAsString(request.getShips());
             var firstUser = game.getUsername1().equals(username);
-            movePublisher.sendPlacement(gameId, firstUser, shipsString);
+            movePublisher.sendPlacement(gameId, game, firstUser, shipsString);
             return null;
         } catch (Exception e) {
             logger.error("Failed to convert ships to string: {}, {}", request.getShips(), e.getMessage());

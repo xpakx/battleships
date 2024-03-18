@@ -34,14 +34,17 @@ public class MovePublisher {
         event.setGameId(game.getId());
         event.setGameState(game.getCurrentState());
         event.setPhase(phase);
+        event.setType(game.getAiType());
+        event.setRuleset(game.getRuleset());
         template.convertAndSend(movesTopic, "ai", event);
     }
 
-    public void sendPlacement(Long gameId, boolean firstUser, String ships) {
+    public void sendPlacement(Long gameId, GameState game, boolean firstUser, String ships) {
         var event = new PlacementEvent();
         event.setGameId(gameId);
         event.setFirstUser(firstUser);
         event.setShips(ships);
+        event.setRuleset(game.getRuleset());
         template.convertAndSend(movesTopic, "placement", event);
     }
 }
