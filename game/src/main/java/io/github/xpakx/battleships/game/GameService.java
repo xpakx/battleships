@@ -120,6 +120,8 @@ public class GameService {
         game.setUserShips(event.getUserShips());
         game.setOpponentCurrentState(event.getOpponentCurrentState());
         game.setOpponentShips(event.getOpponentShips());
+        game.setRuleset(event.getRuleset());
+        game.setAiType(event.getAiType());
         repository.save(game);
         logger.debug("Sending state of game {} to websocket topic", event.getId());
         var msg = GameMessage.of(game);
