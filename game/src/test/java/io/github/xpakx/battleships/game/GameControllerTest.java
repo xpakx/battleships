@@ -146,6 +146,18 @@ class GameControllerTest {
                 null
         );
         rabbitAdmin.declareBinding(binding2);
+
+
+        var queue3 = new Queue("test.placement.queue", true);
+        rabbitAdmin.declareQueue(queue3);
+        Binding binding3 = new Binding(
+                "test.placement.queue",
+                Binding.DestinationType.QUEUE,
+                movesExchange,
+                "placement",
+                null
+        );
+        rabbitAdmin.declareBinding(binding3);
         rabbitSetupIsDone = true;
     }
 
@@ -170,6 +182,7 @@ class GameControllerTest {
         rabbitAdmin.purgeQueue(stateQueue);
         rabbitAdmin.purgeQueue("test.queue");
         rabbitAdmin.purgeQueue("test.move.queue");
+        rabbitAdmin.purgeQueue("test.placement.queue");
         gameRepository.deleteAll();
     }
 
@@ -848,6 +861,96 @@ class GameControllerTest {
         assertThat(placementMsg.getPlayer(), equalTo("user1"));
     }
 
+    @Test
+    void shouldSendPlacementFromEngineToUsers() throws Exception {
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+        var latch = new CountDownLatch(1);
+        session.subscribe("/topic/placement/5", new PlacementFrameHandler(latch));
+        Thread.sleep(100);
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(false);
+        game.setFirstUserTurn(false);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        gameRepository.save(game);
+
+        var event = new EnginePlacementEvent();
+        event.setGameId(5L);
+        event.setLegal(true);
+        event.setFirstUser(true);
+        event.setShips("[]");
+        rabbitTemplate.convertAndSend(engineExchange, "placement", event);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertEquals(0, latch.getCount()));
+        var placementMessage = completablePlacement.get(1, SECONDS);
+        assertThat(placementMessage, notNullValue());
+        assertThat(placementMessage.isLegal(), is(true));
+        assertThat(placementMessage.getPlayer(), equalTo("user1"));
+    }
+
+    @Test
+    void shouldSendPlacementEventToRabbitMq() throws Exception {
+        var game = new GameState();
+        game.setUsername1("user1");
+        game.setUsername2("user2");
+        game.setFirstUserStarts(true);
+        game.setFirstUserTurn(true);
+        game.setId(5L);
+        game.setUserCurrentState("???|?x?|???");
+        game.setOpponentCurrentState("???|?x?|???");
+        game.setUserShips("[]");
+        game.setOpponentShips("[]");
+        gameRepository.save(game);
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("Token", generateToken("user1"));
+        StompSession session = stompClient
+                .connectAsync(
+                        baseUrl + "/play/websocket" ,
+                        new WebSocketHttpHeaders(),
+                        stompHeaders,
+                        new StompSessionHandlerAdapter() {}
+                )
+                .get(1, SECONDS);
+        await()
+                .atMost(1, SECONDS)
+                .until(session::isConnected);
+
+        var msg = new PlacementRequest();
+        var ship = new Ship();
+        ship.setHeadX(1);
+        ship.setHeadY(1);
+        ship.setSize(3);
+        ship.setOrientation(ShipOrientation.Horizontal);
+        msg.setShips(List.of(ship));
+        session.send("/app/placement/5", msg);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .until(isQueueNotEmpty("test.placement.queue"), Matchers.is(true));
+        var placementMessage = getPlacementMessage();
+        assert(placementMessage.isPresent());
+        var event = placementMessage.get();
+        assertThat(event.getGameId(), equalTo(5L));
+        assertThat(event.getShips(), equalTo("[{\"headX\":1,\"headY\":1,\"size\":3,\"orientation\":\"Horizontal\"}]"));
+    }
+
     private class ChatFrameHandler implements StompFrameHandler {
         private final CountDownLatch latch;
 
@@ -976,5 +1079,16 @@ class GameControllerTest {
             latch.countDown();
         }
 
+    }
+
+    private Optional<PlacementEvent> getPlacementMessage() {
+        var queuedMessage = rabbitTemplate.receiveAndConvert("test.placement.queue");
+        if (Objects.isNull(queuedMessage)) {
+            return Optional.empty();
+        }
+        if (queuedMessage instanceof PlacementEvent e) {
+            return Optional.of(e);
+        }
+        return Optional.empty();
     }
 }
