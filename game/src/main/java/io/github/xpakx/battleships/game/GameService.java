@@ -213,7 +213,7 @@ public class GameService {
             return msg;
         }
         var game = gameOpt.get();
-        if (game.isGameStarted() && game.isFinished()) {
+        if (game.isGameStarted() || game.isFinished()) {
             var msg = PlacementMessage.rejected(username);
             simpMessagingTemplate.convertAndSend("/topic/placement/" + gameId, msg);
             return msg;
