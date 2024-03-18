@@ -120,12 +120,14 @@ export class BoardComponent implements OnInit {
     if (clicked) {
       this.myShips = this.myShips.filter((a) => a != clicked);
       this.head = undefined;
+      this.repaintShips();
       return;
     }
 
     if (this.head) {
       if (this.head.column != column && this.head.row != row) {
         console.log("bad size")
+        this.head = undefined;
         return;
       }
       let orientation: "Horizontal" | "Vertical" = "Horizontal";
@@ -180,10 +182,10 @@ export class BoardComponent implements OnInit {
   testIfShipIsClicked(ship: Ship, row: number, column: number): boolean {
     if (ship.orientation == "Horizontal") {
       let shipRow = ship.headX;
-      return (row == shipRow && ship.headY <= column && ship.headY + ship.size - 1 <= column) 
+      return (row == shipRow && ship.headY <= column && ship.headY + ship.size - 1 >= column) 
     } else {
       let shipColumn = ship.headY;
-      return (column == shipColumn && ship.headX <= row && ship.headX + ship.size - 1 <= row) 
+      return (column == shipColumn && ship.headX <= row && ship.headX + ship.size - 1 >= row) 
     }
   }
 
