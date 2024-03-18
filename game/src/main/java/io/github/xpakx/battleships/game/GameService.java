@@ -127,7 +127,7 @@ public class GameService {
         if (game.aiTurn() && msg.isGameStarted()) {
             logger.debug("Asking AI engine for move in game {}", event.getId());
             movePublisher.sendAIEvent(game, Phase.Move);
-        } else if (!msg.isGameStarted()) {
+        } else if (!msg.isGameStarted() && game.getOpponentShips().equals("[]")) {
             logger.debug("Asking AI engine for ship placement in game {}", event.getId());
             movePublisher.sendAIEvent(game, Phase.Placement);
         }
