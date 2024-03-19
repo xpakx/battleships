@@ -4,6 +4,7 @@ import io.github.xpakx.battleships.clients.event.AIEvent;
 import io.github.xpakx.battleships.clients.event.MoveEvent;
 import io.github.xpakx.battleships.clients.event.Phase;
 import io.github.xpakx.battleships.clients.event.PlacementEvent;
+import io.github.xpakx.battleships.game.GameRuleset;
 import io.github.xpakx.battleships.game.GameState;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +20,14 @@ public class MovePublisher {
         this.movesTopic = movesTopic;
     }
 
-    public void sendHit(int x, int y, String gameState, String targets, Long gameId) {
+    public void sendHit(int x, int y, String gameState, String targets, Long gameId, GameRuleset rules) {
         MoveEvent event = new MoveEvent();
         event.setGameId(gameId);
         event.setGameState(gameState);
         event.setTargets(targets);
         event.setRow(x);
         event.setColumn(y);
+        event.setRuleset(rules);
         template.convertAndSend(movesTopic, "move", event);
     }
 

@@ -63,7 +63,8 @@ public class GameService {
                 move.getY(),
                 game.getCurrentState(),
                 game.getCurrentTargets(),
-                game.getId()
+                game.getId(),
+                game.getRuleset()
         );
 
         return MoveMessage.of(move.getX(), move.getY(), username, null);

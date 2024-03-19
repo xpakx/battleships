@@ -25,7 +25,8 @@ public class EngineEventHandler {
                     event.getColumn(),
                     game.getCurrentState(),
                     game.getCurrentTargets(),
-                    game.getId()
+                    game.getId(),
+                    game.getRuleset()
             );
         } catch (final Exception e) {
             throw new AmqpRejectAndDontRequeueException(e);

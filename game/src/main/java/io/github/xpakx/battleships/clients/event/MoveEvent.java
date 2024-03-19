@@ -1,5 +1,6 @@
 package io.github.xpakx.battleships.clients.event;
 
+import io.github.xpakx.battleships.game.GameRuleset;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +12,5 @@ public class MoveEvent {
     private Long gameId;
     private Integer column;
     private Integer row;
+    private GameRuleset ruleset;
 }
