@@ -31,7 +31,7 @@ public class StatePublisher {
         event.setLost(game.isLost());
         event.setDrawn(game.isDrawn());
 
-        event.setUserCurrentState(game.getCurrentState());
+        event.setUserCurrentState(game.getUserCurrentState());
         event.setOpponentCurrentState(game.getOpponentCurrentState());
         event.setUserShips(game.getUserShips());
         event.setOpponentShips(game.getOpponentShips());
