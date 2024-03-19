@@ -119,7 +119,7 @@ pub fn move_result(board: &BoardState, ships: &Vec<Ship>, pos: &Pos) -> MoveResu
                     }
                 }
             }
-            let test = ship_positions.iter().all(|pos| board.board[pos.x][pos.y] == Field::Hit);
+            let test = ship_positions.iter().all(|p| {board.board[p.x][p.y] == Field::Hit || p == pos});
             match test {
                 true => MoveResult::Sunk(ship),
                 false => MoveResult::Hit(ship),
