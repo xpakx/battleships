@@ -85,9 +85,9 @@ public class GameState implements Serializable {
 
     public void changeState(String newState) {
         if (isFirstUserTurn()) {
-            userCurrentState = newState;
-        } else {
             opponentCurrentState = newState;
+        } else {
+            userCurrentState = newState;
         }
     }
 }
