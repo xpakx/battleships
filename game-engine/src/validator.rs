@@ -1,6 +1,6 @@
 use std::{usize, cmp::min};
 
-use crate::{BoardDefinition, Ship, Orientation};
+use crate::{BoardDefinition, Ship, Orientation, data::{BoardState, Field}};
 
 pub fn check_ship_placement(board: &BoardDefinition, ships: &Vec<Ship>) -> bool {
     let mut ships_placed = vec![vec![false; board.width as usize]; board.height as usize];
@@ -133,6 +133,20 @@ fn get_next_coord(board: &BoardDefinition, orientation: &Orientation, x: usize, 
         Orientation::Horizontal => y,
     };
     (x_2, y_2)
+}
+
+pub fn check_win(board: &BoardState, sizes: Vec<usize>) -> bool {
+    let all: usize = sizes.iter()
+        .sum();
+    let sunk: usize = board.board.iter().map(|row| {
+        let row_value: usize = row.iter().map(|f| match f {
+            Field::Sunk => 1,
+            _ => 0
+        }).sum();
+        row_value
+    }
+    ).sum();
+    return all == sunk;
 }
 
 #[cfg(test)]

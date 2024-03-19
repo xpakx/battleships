@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}, get_ship_sizes, RuleSet};
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{Ship, Pos, Orientation}, validator::{check_ship_placement, check_ships_are_on_board, check_all_ships_are_placed}, get_ship_sizes};
 
 use super::ai_client::{ShipMsg, ReqRuleSet, to_board_definition, to_rule_set};
 

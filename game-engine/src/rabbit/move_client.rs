@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos, Field}, move_result, MoveResult};
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos, Field}, move_result, MoveResult, validator, RuleSet, get_ship_sizes};
 
 use super::ai_client::ShipMsg;
 use crate::data::Orientation;
@@ -140,6 +140,8 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
         }
     }
 
+    let finished = validator::check_win(&board, get_ship_sizes(RuleSet::Classic)); // TODO
+
     let mut state: Vec<char> = vec![];
     for (i, row) in board.board.iter().enumerate() {
         if i != 0 {
@@ -163,7 +165,7 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
         row: game_msg.row,
         column: game_msg.column,
         legal: legal_move,
-        finished: false, // TODO
+        finished,
         result: match result {
             MoveResult::Miss => String::from("Miss"),
             MoveResult::Hit(_) => String::from("Hit"),
