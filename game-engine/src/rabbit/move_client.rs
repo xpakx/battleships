@@ -1,9 +1,9 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos, Field}, move_result, MoveResult, validator, RuleSet, get_ship_sizes};
+use crate::{rabbit::DESTINATION_EXCHANGE, data::{BoardState, Ship, Pos, Field}, move_result, MoveResult, validator, get_ship_sizes};
 
-use super::ai_client::ShipMsg;
+use super::ai_client::{ShipMsg, to_rule_set, ReqRuleSet};
 use crate::data::Orientation;
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
@@ -66,6 +66,7 @@ struct MoveMessage {
     game_id: i32,
     column: usize,
     row: usize,
+    ruleset: ReqRuleSet,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -140,7 +141,7 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
         }
     }
 
-    let finished = validator::check_win(&board, get_ship_sizes(RuleSet::Classic)); // TODO
+    let finished = validator::check_win(&board, get_ship_sizes(to_rule_set(&game_msg.ruleset))); // TODO
 
     let mut state: Vec<char> = vec![];
     for (i, row) in board.board.iter().enumerate() {
