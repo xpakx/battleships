@@ -37,6 +37,9 @@ export class BoardComponent implements OnInit {
   @Input() set gameId(value: number | undefined) {
     this._gameId = value;
     this.finished = false;
+    this.myShips = [];
+    this.shipsPlaced = false;
+    this.repaintShips();
     if (this._gameId) {
       this.websocket.connect();
       this.websocket.subscribeGame(this._gameId);
