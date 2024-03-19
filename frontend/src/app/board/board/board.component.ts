@@ -72,7 +72,7 @@ export class BoardComponent implements OnInit {
   }
 
   makeMove(move: MoveMessage) {
-    this.error = Array(10).fill(Array(10).fill(""));
+    this.error = Array(10).fill(null).map(() => Array(10).fill(""));
     if (!move.legal) {
       this.error[move.x][move.y] = "illegal";
       return;
