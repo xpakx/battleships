@@ -244,6 +244,7 @@ export class BoardComponent implements OnInit {
         this.myShips = game.myShips;
         if (this.myShips.length > 0) {
           this.shipsPlaced = true;
+          this.repaintShips();
         }
       }
     });
