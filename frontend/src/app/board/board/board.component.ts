@@ -37,12 +37,12 @@ export class BoardComponent implements OnInit {
   @Input() set gameId(value: number | undefined) {
     this._gameId = value;
     this.finished = false;
-    this.myShips = [];
-    this.shipsPlaced = false;
-    this.repaintShips();
     if (this._gameId) {
       this.websocket.connect();
       this.websocket.subscribeGame(this._gameId);
+      this.myShips = [];
+      this.shipsPlaced = false;
+      this.repaintShips();
     }
   }
 
@@ -50,7 +50,7 @@ export class BoardComponent implements OnInit {
 
   ngOnInit(): void {
     this.boardSub = this.websocket.board$
-    .subscribe((board: BoardMessage) => this.updateBoard(board));
+      .subscribe((board: BoardMessage) => this.updateBoard(board));
 
     this.moveSub = this.websocket.move$
     .subscribe((move: MoveMessage) => this.makeMove(move));
