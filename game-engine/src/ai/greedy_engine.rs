@@ -1,4 +1,5 @@
-use crate::{BoardDefinition, Ship, Pos, Field, BoardState};
+use crate::data::Orientation;
+use crate::{BoardDefinition, Ship, Pos, Field, BoardState, validator};
 use crate::ai::Engine;
 
 use rand::prelude::*;
@@ -20,8 +21,40 @@ impl Engine for GreedyEngine {
         String::from("Greedy Engine")
     }
 
-    fn place_ships(&mut self, _board: &BoardDefinition, _ships: Vec<usize>) -> Vec<Ship> {
-        vec![]
+    fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<usize>) -> Vec<Ship> {
+        let mut rng = thread_rng();
+
+        let width = board.width;
+        let height = board.height;
+
+        let mut placed_ships: Vec<Ship> = Vec::new();
+
+        loop {
+            for size in ships.iter() {
+                let x = rng.gen_range(0..width);
+                let y = rng.gen_range(0..height);
+
+                let head = Pos {x, y};
+                let orientation = match rng.gen_ratio(1, 2) {
+                    true => Orientation::Horizontal,
+                    false => Orientation::Vertical,
+                };
+
+                placed_ships.push(Ship {
+                    head,
+                    size: size.clone(),
+                    orientation,
+                });
+
+            }
+
+            if validator::check_ships_are_on_board(board, &placed_ships) && validator::check_ship_placement(board, &placed_ships) {
+                break;
+            }
+            placed_ships.clear();
+        }
+
+        placed_ships
     }
 
     fn get_shot(&mut self, board: &BoardState) -> Pos {

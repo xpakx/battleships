@@ -141,7 +141,7 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
         }
     }
 
-    let finished = validator::check_win(&board, get_ship_sizes(to_rule_set(&game_msg.ruleset))); // TODO
+    let finished = validator::check_win(&board, get_ship_sizes(to_rule_set(&game_msg.ruleset)));
 
     let mut state: Vec<char> = vec![];
     for (i, row) in board.board.iter().enumerate() {
