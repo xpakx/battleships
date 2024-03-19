@@ -97,7 +97,7 @@ impl Default for EngineEvent {
 }
 
 fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
-    let board = BoardState::of(&game_msg.game_state, vec![], true);
+    let mut board = BoardState::of(&game_msg.game_state, vec![], true);
     let ships: Vec<ShipMsg> = match serde_json::from_str(&game_msg.targets) {
         Ok(ships) => ships,
         Err(_) => {
@@ -122,32 +122,38 @@ fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
             _ => true,
     };
 
+    if legal_move {
+        board.board[hit_pos.x][hit_pos.y] = match result {
+            MoveResult::Miss=> Field::Miss,
+            MoveResult::Hit(_) => Field::Hit,
+            MoveResult::Sunk(_) => Field::Sunk,
+            MoveResult::Illegal => panic!("Shouldn't happen"),
+        };
+
+        if let MoveResult::Sunk(ship) = result {
+            for i in 0..ship.size {
+                match ship.orientation {
+                    Orientation::Horizontal => board.board[ship.head.x][ship.head.y+i] = Field::Sunk,
+                    Orientation::Vertical => board.board[ship.head.x+i][ship.head.y] = Field::Sunk,
+                }
+            }
+        }
+    }
+
     let mut state: Vec<char> = vec![];
     for (i, row) in board.board.iter().enumerate() {
         if i != 0 {
             state.push('|');
         }
-        for (j, field) in row.iter().enumerate() {
-            if i == hit_pos.x && j == hit_pos.y && legal_move {
-                state.push(
-                    match result {
-                        MoveResult::Miss=> 'o',
-                        MoveResult::Hit(_) => '.',
-                        MoveResult::Sunk(_) => 'x',
-                        MoveResult::Illegal => panic!("Shouldn't happen"),
-                    }
-                    );
-            } else {
-                state.push(
-                    match field {
-                        Field::Miss=> 'o',
-                        Field::Hit => '.',
-                        Field::Sunk => 'x',
-                        Field::Empty => '?',
-                    }
-                    );
-                
-            }
+        for field in row.iter(){
+            state.push(
+                match field {
+                    Field::Miss=> 'o',
+                    Field::Hit => '.',
+                    Field::Sunk => 'x',
+                    Field::Empty => '?',
+                }
+                );
         }
     }
     let state: String = state.into_iter().collect();
