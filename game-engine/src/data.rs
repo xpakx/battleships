@@ -50,7 +50,7 @@ impl BoardState {
                 let field = match ch {
                     '?' => Field::Empty,
                     'x' => Field::Sunk,
-                    'o' => Field::Hit,
+                    '.' => Field::Hit,
                     _ => Field::Miss,
                 };
                 row.push(field);
