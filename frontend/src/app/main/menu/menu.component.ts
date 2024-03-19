@@ -1,9 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Game } from '../dto/game';
-import { GameResponse } from '../dto/game-response';
 import { GameManagementService } from '../game-management.service';
-import { GameRequest } from '../dto/game-request';
 
 @Component({
   selector: 'app-menu',
@@ -16,10 +14,9 @@ export class MenuComponent implements OnInit {
   activeView: boolean = false;
   error: boolean = false;
   errorMsg: String = "";
-  openRequestModal: boolean = false;
-  requestModalForAI: boolean = false;
 
   @Output() openGame: EventEmitter<number> = new EventEmitter<number>();
+  @Output() openGameModal: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(private gameService: GameManagementService) { }
 
@@ -76,35 +73,14 @@ export class MenuComponent implements OnInit {
   }
   
   newGame() {
-    this.openRequestModal = true;
-    this.requestModalForAI = false;
+    this.openGameModal.emit(false);
   }
 
   newAIGame() {
-    this.openRequestModal = true;
-    this.requestModalForAI = true;
+    this.openGameModal.emit(true);
   }
 
   open(gameId: number) {
     this.openGame.emit(gameId);
-  }
-
-  closeRequestModal(request: GameRequest) {
-    this.openRequestModal = false;
-    this.gameService.newGame(request)
-      .subscribe({
-        next: (game: GameResponse) => this.onRequestSent(game, request),
-        error: (err: HttpErrorResponse) => this.onError(err)
-      });
-
-  }
-
-  onRequestSent(game: GameResponse, request: GameRequest) {
-    if (request.type == "AI") {
-      this.open(game.id);
-    } else {
-      // todo
-      console.log(`${request.opponent} invited to game`)
-    }
   }
 }
