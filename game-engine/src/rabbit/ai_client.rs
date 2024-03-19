@@ -196,7 +196,7 @@ fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
 
 fn process_move_event(game_msg: &AIMessage) -> EngineAIEvent {
     let board = BoardState::of(&game_msg.game_state, vec![], true);
-    let mut engine = get_engine(EngineType::Random);
+    let mut engine = to_engine(&game_msg.ai_type);
     let mv = engine.get_shot(&board);
     EngineAIEvent {
         game_id: game_msg.game_id,
