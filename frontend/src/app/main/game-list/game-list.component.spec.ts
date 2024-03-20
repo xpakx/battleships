@@ -124,3 +124,57 @@ describe('GameListComponent (requests)', () => {
     expect(gameService.acceptRequest).toHaveBeenCalledWith(gameId, { accepted: false });
   });
 });
+
+@Component({
+  selector: 'app-test-host-component',
+  template: '<app-game-list [games]="games" [active]="active" [requests]="requests" (openGame)="onOpenGame($event)"></app-game-list>'
+})
+class TestActiveHostComponent {
+  games: Game[] = [
+    { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] }
+  ];
+  active = true;
+  requests = false;
+  onOpenGame(gameId: number) {}
+}
+
+describe('GameListComponent (active)', () => {
+  let testHostComponent: TestActiveHostComponent;
+  let fixture: ComponentFixture<TestRequestsHostComponent>;
+  let gameService: jasmine.SpyObj<GameManagementService>;
+
+  beforeEach(async () => {
+    const gameServiceSpy = jasmine.createSpyObj('GameManagementService', ['acceptRequest', 'rejectRequest']);
+    await TestBed.configureTestingModule({
+      declarations: [GameListComponent, TestActiveHostComponent],
+      imports: [HttpClientTestingModule],
+      providers: [{ provide: GameManagementService, useValue: gameServiceSpy }]
+    })
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(TestActiveHostComponent);
+    testHostComponent = fixture.componentInstance;
+    gameService = TestBed.inject(GameManagementService) as jasmine.SpyObj<GameManagementService>;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(testHostComponent).toBeTruthy();
+  });
+
+  it('should render buttons based on inputs', () => {
+    const buttons = fixture.nativeElement.querySelectorAll('button');
+    expect(buttons.length).toEqual(1);
+  });
+
+  it('should emit openGame event when open button is clicked', () => {
+    const gameId = 1;
+    spyOn(testHostComponent, 'onOpenGame');
+    const openButton = fixture.nativeElement.querySelector('button:nth-child(2)');
+    openButton.click();
+
+    expect(testHostComponent.onOpenGame).toHaveBeenCalledWith(gameId);
+  });
+});
