@@ -148,7 +148,6 @@ export class WebsocketService {
       });
   }
 
-
   subscribeChat(gameId: number) {
     if(this.rxStomp == undefined) {
       return;
