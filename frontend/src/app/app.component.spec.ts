@@ -3,6 +3,9 @@ import { AppComponent } from './app.component';
 import { GameManagementService } from './main/game-management.service';
 import { NewGameModalComponent } from './main/new-game-modal/new-game-modal.component';
 import { By } from '@angular/platform-browser';
+import { GameRequest } from './main/dto/game-request';
+import { GameResponse } from './main/dto/game-response';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
   let gameServiceSpy: jasmine.SpyObj<GameManagementService>;
@@ -29,13 +32,6 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('Battleships');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('battleships app is running!');
   });
 
   it('should change register card value', () => {
@@ -162,4 +158,36 @@ describe('AppComponent', () => {
     const modalElement = fixture.nativeElement.querySelector('.modal');
     expect(modalElement).toBeFalsy();
   });
+
+  it('should close request modal and call newGame', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    const request: GameRequest = { rules: "Classic", type: "AI" };
+    const gameResponse: GameResponse = { id: 123 };
+    gameServiceSpy.newGame.and.returnValue(of(gameResponse));
+
+    app.closeRequestModal(request);
+
+    expect(app.openRequestModal).toBe(false);
+    expect(gameServiceSpy.newGame).toHaveBeenCalledWith(request);
+  });
+
+  it('should not render NewGameModal component after close request modal is called', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.openRequestModal = true;
+    fixture.detectChanges();
+
+    const request: GameRequest = { rules: "Classic", type: "AI" };
+    const gameResponse: GameResponse = { id: 123 };
+    gameServiceSpy.newGame.and.returnValue(of(gameResponse));
+    app.closeRequestModal(request);
+    fixture.detectChanges();
+
+    const newGameModalComponent = fixture.debugElement.query(By.css('.modal app-new-game-modal'));
+    expect(newGameModalComponent).toBeFalsy();
+  });
+
 });
