@@ -190,4 +190,16 @@ describe('AppComponent', () => {
     expect(newGameModalComponent).toBeFalsy();
   });
 
+  it('should call open method with game id if request type is AI', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    const gameResponse: GameResponse = { id: 123 };
+    const request: GameRequest = { rules: "Classic", type: "AI" };
+
+    spyOn(app, 'open');
+    app.onRequestSent(gameResponse, request);
+
+    expect(app.open).toHaveBeenCalledWith(gameResponse.id);
+  });
 });
