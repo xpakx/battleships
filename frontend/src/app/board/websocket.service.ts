@@ -13,8 +13,7 @@ import { PlacementMessage } from './dto/placement-message';
 })
 export class WebsocketService {
   private apiUrl: String;
-  connected: boolean = false;
-  rxStomp?: RxStomp;
+  rxStomp: RxStomp = new RxStomp();
 
   private boardSubject: Subject<BoardMessage> = new Subject<BoardMessage>();
   private boardQueue?: Subscription;
@@ -29,9 +28,7 @@ export class WebsocketService {
   private placementQueue?: Subscription;
   placement$: Observable<PlacementMessage> = this.placementSubject.asObservable();
 
-
   private chatQueue?: Subscription;
-
 
   constructor() { 
     this.apiUrl = environment.apiUrl.replace(/^http/, 'ws');
@@ -43,14 +40,13 @@ export class WebsocketService {
   }
 
   connect() {
-    if (this.connected) {
+    if (this.rxStomp.connected()) {
       return;
     }
     let url = this.apiUrl + "/play/websocket";
     let tokenFromStorage = localStorage.getItem("token");
     let token = tokenFromStorage == null ? "" : tokenFromStorage;
     
-    this.rxStomp = new RxStomp();
     this.rxStomp.configure({
       brokerURL: url,
       connectHeaders: {
@@ -68,20 +64,13 @@ export class WebsocketService {
 
     console.log("activating");
     this.rxStomp.activate();
-    this.connected = true;
   }
 
   makeMove(gameId: number, move: MoveRequest) {
-    if(this.rxStomp == undefined) {
-      return;
-    }
     this.rxStomp.publish({ destination: `/app/move/${gameId}`, body: JSON.stringify(move) });
   }
 
   placeShips(gameId: number, move: PlacementRequest) {
-    if(this.rxStomp == undefined) {
-      return;
-    }
     this.rxStomp.publish({ destination: `/app/placement/${gameId}`, body: JSON.stringify(move) });
   }
 
@@ -102,13 +91,10 @@ export class WebsocketService {
   }
 
   disconnect() {
-    this.rxStomp?.deactivate();
+    this.rxStomp.deactivate();
   }
 
   subscribeMoves(gameId: number) {
-    if(this.rxStomp == undefined) {
-      return;
-    }
     this.moveQueue = this.rxStomp
       .watch(`/topic/game/${gameId}`)
       .subscribe((message: IMessage) => {
@@ -118,9 +104,6 @@ export class WebsocketService {
   }
 
   subscribePlacement(gameId: number) {
-    if(this.rxStomp == undefined) {
-      return;
-    }
     this.placementQueue = this.rxStomp
       .watch(`/topic/placement/${gameId}`)
       .subscribe((message: IMessage) => {
@@ -130,9 +113,6 @@ export class WebsocketService {
   }
 
   subscribeBoard(gameId: number) {
-    if(this.rxStomp == undefined) {
-      return;
-    }
     this.boardOOB = this.rxStomp
       .watch(`/app/board/${gameId}`)
       .subscribe((message: IMessage) => {
@@ -149,9 +129,6 @@ export class WebsocketService {
   }
 
   subscribeChat(gameId: number) {
-    if(this.rxStomp == undefined) {
-      return;
-    }
     this.chatQueue = this.rxStomp
       .watch(`/topic/chat/${gameId}`)
       .subscribe((message: IMessage) => {
