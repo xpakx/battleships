@@ -3,14 +3,14 @@ import { TestBed } from '@angular/core/testing';
 import { WebsocketService } from './websocket.service';
 import { IMessage, RxStomp } from '@stomp/rx-stomp';
 import { Subscription, of } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 describe('WebsocketService', () => {
   let service: WebsocketService;
   let rxStompSpy: jasmine.SpyObj<RxStomp>;
 
-
   beforeEach(() => {
-    const spyStomp = jasmine.createSpyObj('RxStomp', ['configure', 'activate', 'deactivate', 'publish', 'watch']);
+    const spyStomp = jasmine.createSpyObj('RxStomp', ['configure', 'activate', 'deactivate', 'publish', 'watch', 'connected']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -111,5 +111,34 @@ describe('WebsocketService', () => {
     service.unsubscribe();
 
     expect(unsubscribeSpy.unsubscribe).toHaveBeenCalledTimes(5);
+  });
+
+  it('should connect to WebSocket server if not already connected', () => {
+    rxStompSpy.connected.and.returnValue(false);
+    service.rxStomp = rxStompSpy;
+    spyOn(localStorage, 'getItem').and.returnValue('dummyToken');
+
+    service.connect();
+
+    expect(rxStompSpy.configure).toHaveBeenCalled();
+    expect(rxStompSpy.activate).toHaveBeenCalled();
+
+    const expectedUrl = `${environment.apiUrl.replace(/^http/, 'ws')}/play/websocket`
+    const expectedToken = 'dummyToken';
+    const expectedConnectHeaders = { Token: expectedToken };
+    expect(rxStompSpy.configure).toHaveBeenCalledWith(jasmine.objectContaining({
+      brokerURL: expectedUrl,
+      connectHeaders: expectedConnectHeaders
+    }));
+  });
+
+  it('should not attempt to connect if already connected', () => {
+    rxStompSpy.connected.and.returnValue(true);
+    service.rxStomp = rxStompSpy;
+
+    service.connect();
+
+    expect(rxStompSpy.configure).not.toHaveBeenCalled();
+    expect(rxStompSpy.activate).not.toHaveBeenCalled();
   });
 });
