@@ -248,4 +248,39 @@ describe('BoardComponent', () => {
     expect(component.opponentBoard[1][2]).toEqual('Hit');
     expect(component.myBoard[2][2]).toEqual('Miss');
   });
+
+  it('should handle a legal ship placement', () => {
+    const mockPlacement: PlacementMessage = { legal: true, player: 'Player1' };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.gameId = 123;
+    component.makePlacement(mockPlacement);
+
+    expect(component.shipsPlaced).toBeTrue();
+    expect(component.errorMsg).toBeFalse();
+  });
+
+  it('should handle an illegal ship placement', () => {
+    const mockPlacement: PlacementMessage = { legal: false, player: 'Player1' };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.gameId = 123;
+    component.makePlacement(mockPlacement);
+
+    expect(component.shipsPlaced).toBeFalse();
+    expect(component.errorMsg).toBeTrue();
+    expect(component.msg).toContain('not legal');
+  });
+
+  it('should not handle placement message from other players', () => {
+    const mockPlacement: PlacementMessage = { legal: true, player: 'Player2' };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.gameId = 123;
+    component.makePlacement(mockPlacement);
+
+    expect(component.shipsPlaced).toBeFalse();
+    expect(component.errorMsg).toBeFalse();
+  });
+
 });
