@@ -15,7 +15,6 @@ export interface Game {
     username1: String;
     username2: String; 
     userStarts: boolean;
-    currentSymbol: String;
 
     myShips: Ship[];
 }

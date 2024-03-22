@@ -70,7 +70,7 @@ describe('GameListComponent', () => {
 })
 class TestRequestsHostComponent {
   games: Game[] = [
-    { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] }
+    { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, myShips: [] }
   ];
   active = false;
   requests = true;
@@ -131,7 +131,7 @@ describe('GameListComponent (requests)', () => {
 })
 class TestActiveHostComponent {
   games: Game[] = [
-    { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] }
+    { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, myShips: [] }
   ];
   active = true;
   requests = false;

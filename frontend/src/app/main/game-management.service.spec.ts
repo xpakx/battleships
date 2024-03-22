@@ -51,7 +51,7 @@ describe('GameManagementService', () => {
 
   describe('get games', () => {
     it('should send a GET request to active games endpoint', () => {
-      const mockResponse: Game[] = [{ id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] }];
+      const mockResponse: Game[] = [{ id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, myShips: [] }];
       spyOn(localStorage, 'getItem').and.returnValue('mockToken');
 
       service.getActiveGames().subscribe(response => {
@@ -67,7 +67,7 @@ describe('GameManagementService', () => {
     });
 
     it('should send a GET request to requests endpoint', () => {
-      const mockResponse: Game[] = [{ id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] }];
+      const mockResponse: Game[] = [{ id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, myShips: [] }];
       spyOn(localStorage, 'getItem').and.returnValue('mockToken');
 
       service.getGameRequests().subscribe(response => {
@@ -83,7 +83,7 @@ describe('GameManagementService', () => {
     });
 
     it('should send a GET request to archive endpoint', () => {
-      const mockResponse: Game[] = [{ id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] }];
+      const mockResponse: Game[] = [{ id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, myShips: [] }];
       spyOn(localStorage, 'getItem').and.returnValue('mockToken');
 
       service.getFinishedGames().subscribe(response => {
@@ -121,7 +121,7 @@ describe('GameManagementService', () => {
 
   describe('get game', () => {
     it('should send a GET request to get game endpoint', () => {
-      const mockResponse: Game = { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, currentSymbol: '', myShips: [] };
+      const mockResponse: Game = { id: 1, username1: 'User1', username2: 'User2', currentState: [], lastMoveRow: 0, lastMoveColumn: 0, type: '', finished: false, won: false, lost: false, drawn: false, userStarts: true, myShips: [] };
       spyOn(localStorage, 'getItem').and.returnValue('mockToken');
 
       service.getGame(7).subscribe(response => {
