@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum AIType {
     Random("Random"),
     Greedy("Greedy"),
+    Parity("Parity"),
     None("None") ;
 
     private final String type;
