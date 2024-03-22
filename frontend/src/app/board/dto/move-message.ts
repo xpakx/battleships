@@ -4,7 +4,6 @@ export interface MoveMessage {
     y: number;
 
     legal: boolean;
-    applied: boolean;
 
     result: "Miss" | "Hit" | "Sunk";
 

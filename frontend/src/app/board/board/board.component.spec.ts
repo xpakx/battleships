@@ -179,4 +179,73 @@ describe('BoardComponent', () => {
 
     expect(websocketServiceSpy.placeShips).toHaveBeenCalledWith(gameId, { ships: mockShips });
   });
+
+  it('should update the board when a move message is received', () => {
+    const mockMove: MoveMessage = { x: 1, y: 2, result: 'Hit', legal: true, finished: false, player: 'Player1', winner: undefined, won: false };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.game = { username1: "Player1", username2: "Player2", ai: true, state1: [], state2: [], currentPlayer: "Player1", gameStarted: true};
+    component.myBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+    component.opponentBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+
+    moveSubject.next(mockMove);
+
+    expect(component.opponentBoard[1][2]).toEqual('Hit');
+  });
+
+  it('should handle an illegal move message', () => {
+    const mockIllegalMove: MoveMessage = { x: 1, y: 2, result: 'Miss', legal: false, finished: false, player: 'Player1', winner: undefined, won: false };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.game = { username1: "Player1", username2: "Player2", ai: true, state1: [], state2: [], currentPlayer: "Player1", gameStarted: true };
+    component.myBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+    component.opponentBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+
+    moveSubject.next(mockIllegalMove);
+
+    expect(component.error[1][2]).toEqual('illegal');
+  });
+
+  it('should handle a move message indicating game finish', () => {
+    const mockFinishMove: MoveMessage = { x: 1, y: 2, result: 'Hit', legal: true, finished: true, player: 'Player1', winner: 'Player1', won: true };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.game = { username1: "Player1", username2: "Player2", ai: true, state1: [], state2: [], currentPlayer: "Player1", gameStarted: true };
+    component.myBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+    component.opponentBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+
+    moveSubject.next(mockFinishMove);
+
+    expect(component.finished).toBe(true);
+    expect(component.msg).toEqual('You won!');
+  });
+
+  it('should update the opponent\'s board when they make a move', () => {
+    const mockOpponentMove: MoveMessage = { x: 1, y: 2, result: 'Hit', legal: true, finished: false, player: 'Player2', winner: undefined, won: false };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.game = { username1: "Player1", username2: "Player2", ai: true, state1: [], state2: [], currentPlayer: "Player1", gameStarted: true };
+    component.myBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+    component.opponentBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+
+    moveSubject.next(mockOpponentMove);
+
+    expect(component.myBoard[1][2]).toEqual('Hit');
+  });
+
+  it('should distinguish between moves made by different players', () => {
+    const mockPlayer1Move: MoveMessage = { x: 1, y: 2, result: 'Hit', legal: true, finished: false, player: 'Player1', winner: undefined, won: false };
+    const mockPlayer2Move: MoveMessage = { x: 2, y: 2, result: 'Miss', legal: true, finished: false, player: 'Player2', winner: undefined, won: false };
+    spyOn(localStorage, 'getItem').and.returnValue('Player1');
+
+    component.game = { username1: "Player1", username2: "Player2", ai: false, state1: [], state2: [], currentPlayer: "Player1", gameStarted: true };
+    component.myBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+    component.opponentBoard = [["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"], ["Empty", "Empty", "Empty"]]
+
+    moveSubject.next(mockPlayer1Move);
+    moveSubject.next(mockPlayer2Move);
+
+    expect(component.opponentBoard[1][2]).toEqual('Hit');
+    expect(component.myBoard[2][2]).toEqual('Miss');
+  });
 });
