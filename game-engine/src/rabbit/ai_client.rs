@@ -89,6 +89,7 @@ pub enum ReqRuleSet {
 pub enum AIType {
     Random,
     Greedy,
+    Parity,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -147,6 +148,7 @@ fn to_engine(ai_type: &AIType) -> Box<dyn Engine> {
     match ai_type {
         AIType::Random => get_engine(EngineType::Random),
         AIType::Greedy => get_engine(EngineType::Greedy),
+        AIType::Parity => get_engine(EngineType::Parity),
     }
 }
 

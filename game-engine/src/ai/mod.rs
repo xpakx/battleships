@@ -1,5 +1,6 @@
 pub mod random_engine;
 pub mod greedy_engine;
+pub mod parity_engine;
 use crate::{BoardDefinition, Ship, Pos, BoardState};
 
 pub trait Engine {
@@ -11,11 +12,13 @@ pub trait Engine {
 pub enum EngineType {
     Random,
     Greedy,
+    Parity,
 }
 
 pub fn get_engine(engine: EngineType) -> Box<dyn Engine> {
     match engine {
         EngineType::Random => Box::new(random_engine::RandomEngine::new()),
         EngineType::Greedy => Box::new(greedy_engine::GreedyEngine::new()),
+        EngineType::Parity => Box::new(parity_engine::ParityEngine::new()),
     }
 }
