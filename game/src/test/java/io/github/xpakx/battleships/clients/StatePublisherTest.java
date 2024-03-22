@@ -137,8 +137,8 @@ class StatePublisherTest {
         assertThat(update.getGameId(), equalTo(5L));
         assertThat(update.getLastMoveY(), equalTo(3));
         assertThat(update.getLastMoveX(), equalTo(7));
-        assertThat(update.getOpponentCurrentState(), equalTo("old state"));
-        assertThat(update.getUserCurrentState(), equalTo("new state"));
+        assertThat(update.getUserCurrentState(), equalTo("old state"));
+        assertThat(update.getOpponentCurrentState(), equalTo("new state"));
     }
 
     private int getMessageCount(String queueName) {

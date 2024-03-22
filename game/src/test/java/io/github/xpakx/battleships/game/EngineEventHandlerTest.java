@@ -152,11 +152,11 @@ class EngineEventHandlerTest {
         rabbitTemplate.convertAndSend(engineExchange, "validation.move", event);
         await()
                 .atMost(5, SECONDS)
-                .untilAsserted(() -> assertThat(recordHasNewState(5L, "new state"), is(true)));
+                .untilAsserted(() -> assertThat(recordHasNewState(5L, "new state", false), is(true)));
         var gameOpt = gameRepository.findById(5L);
         assertThat(gameOpt.isPresent(), is(true));
         var gameDb = gameOpt.get();
-        assertThat(gameDb.getCurrentState(), equalTo("new state"));
+        assertThat(gameDb.getOpponentCurrentState(), equalTo("new state"));
         assertThat(gameDb.isFirstUserTurn(), is(false));
     }
 
@@ -170,8 +170,8 @@ class EngineEventHandlerTest {
         game.setId(5L);
         game.setUserCurrentState("???|?x?|???");
         game.setOpponentCurrentState("???|?x?|???");
-        game.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
-        game.setOpponentShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setUserShips("[{\"headX\":2,\"headY\":1,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        game.setOpponentShips("[{\"headX\":2,\"headY\":1,\"size\":1,\"orientation\":\"Horizontal\"}]");
         gameRepository.save(game);
 
         var event = new EngineMoveEvent();
@@ -187,7 +187,7 @@ class EngineEventHandlerTest {
         var moveOpt = getAIMessage();
         assertThat(moveOpt.isPresent(), is(true));
         var move = moveOpt.get();
-        assertThat(move.getGameState(), equalTo("???|?xx|???"));
+        assertThat(move.getGameState(), equalTo("???|?x?|???"));
         assertThat(move.getPhase(), equalTo(Phase.Move));
     }
 
@@ -276,10 +276,11 @@ class EngineEventHandlerTest {
         assertThat(moveEvent.getTargets(), equalTo(game.getUserShips()));
     }
 
-    private boolean recordHasNewState(Long id, String newState) {
+    private boolean recordHasNewState(Long id, String newState, boolean firstUser) {
         var gameOpt = gameRepository.findById(id);
         return gameOpt
-                .map((a) -> a.getCurrentState().equals(newState))
+                .map((a) -> firstUser ? a.getUserCurrentState() : a.getOpponentCurrentState())
+                .map((a) -> a.equals(newState))
                 .orElse(false);
     }
 

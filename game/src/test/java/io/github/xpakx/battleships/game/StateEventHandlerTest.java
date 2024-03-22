@@ -154,8 +154,8 @@ class StateEventHandlerTest {
         event.setFirstUserStarts(false);
         event.setUserCurrentState("???|?x?|???");
         event.setOpponentCurrentState("???|?x?|???");
-        event.setUserShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
-        event.setOpponentShips("[{\"headX\":8,\"headY\":6,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        event.setUserShips("[{\"headX\":2,\"headY\":2,\"size\":1,\"orientation\":\"Horizontal\"}]");
+        event.setOpponentShips("[{\"headX\":2,\"headY\":2,\"size\":1,\"orientation\":\"Horizontal\"}]");
         rabbitTemplate.convertAndSend(stateExchange, "state", event);
 
         await()
