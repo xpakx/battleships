@@ -97,7 +97,7 @@ impl Engine for ParityEngine {
 
         for (x, row) in board.board.iter().enumerate() {
             for (y, field) in row.iter().enumerate() {
-                let num = x * board.definition.width + y;
+                let num = x * (board.definition.width + 1) + y;
                 if field == &Field::Empty && num % shortest_ship == 0 {
                     empty_positions.push(Pos {x, y});
                 }
