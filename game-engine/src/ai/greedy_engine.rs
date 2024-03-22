@@ -21,7 +21,8 @@ impl Engine for GreedyEngine {
         String::from("Greedy Engine")
     }
 
-    fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<usize>) -> Vec<Ship> {
+    fn place_ships(&mut self, board: &BoardDefinition) -> Vec<Ship> {
+        let ships: &Vec<usize> = &board.sizes;
         let mut rng = thread_rng();
 
         let width = board.width;

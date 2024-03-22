@@ -27,8 +27,8 @@ pub enum RuleSet {
 
 pub fn get_board_definition(ruleset: RuleSet) -> BoardDefinition {
     match ruleset {
-        RuleSet::Classic => BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: true },
-        RuleSet::Polish => BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false },
+        RuleSet::Classic => BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: true, sizes: get_ship_sizes(ruleset) },
+        RuleSet::Polish => BoardDefinition { width: 10, height: 10, adjacent_ships_allowed: false, sizes: get_ship_sizes(ruleset) },
     }
 }
 

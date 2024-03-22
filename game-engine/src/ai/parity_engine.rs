@@ -1,5 +1,5 @@
 use crate::data::Orientation;
-use crate::{BoardDefinition, Ship, Pos, Field, BoardState, validator, get_ship_sizes, RuleSet};
+use crate::{BoardDefinition, Ship, Pos, Field, BoardState, validator};
 use crate::ai::Engine;
 
 use rand::prelude::*;
@@ -21,7 +21,8 @@ impl Engine for ParityEngine {
         String::from("Parity Engine")
     }
 
-    fn place_ships(&mut self, board: &BoardDefinition, ships: Vec<usize>) -> Vec<Ship> {
+    fn place_ships(&mut self, board: &BoardDefinition) -> Vec<Ship> {
+        let ships: &Vec<usize> = &board.sizes;
         let mut rng = thread_rng();
 
         let width = board.width;
@@ -92,7 +93,7 @@ impl Engine for ParityEngine {
 
         // exploration
         let mut empty_positions = Vec::new();
-        let shortest_ship = get_ship_sizes(RuleSet::Classic).iter().min().unwrap().to_owned(); // TODO: only remaining ships
+        let shortest_ship = board.definition.sizes.iter().min().unwrap().to_owned(); // TODO: only remaining ships
 
         for (x, row) in board.board.iter().enumerate() {
             for (y, field) in row.iter().enumerate() {

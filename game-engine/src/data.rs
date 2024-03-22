@@ -15,6 +15,7 @@ pub struct BoardDefinition {
     pub width: usize,
     pub height: usize,
     pub adjacent_ships_allowed: bool,
+    pub sizes: Vec<usize>,
 }
 
 #[derive(PartialEq)]
@@ -58,8 +59,8 @@ impl BoardState {
             board.push(row);
         }
         BoardState {
-            remaining_ships: ships,
-            definition: BoardDefinition { width, height, adjacent_ships_allowed: adjacent },
+            remaining_ships: ships.clone(),
+            definition: BoardDefinition { width, height, adjacent_ships_allowed: adjacent, sizes: ships },
             board,
         }
     }

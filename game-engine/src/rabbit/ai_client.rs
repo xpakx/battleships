@@ -1,7 +1,7 @@
 use lapin::{Channel, options::BasicAckOptions, message::DeliveryResult, Consumer};
 
 use serde::{Serialize, Deserialize};
-use crate::{rabbit::DESTINATION_EXCHANGE, ai::{get_engine, EngineType, Engine}, data::{BoardState, BoardDefinition}, get_board_definition, RuleSet, get_ship_sizes};
+use crate::{rabbit::DESTINATION_EXCHANGE, ai::{get_engine, EngineType, Engine}, data::{BoardState, BoardDefinition}, get_board_definition, RuleSet};
 
 pub fn set_delegate(consumer: Consumer, channel: Channel) {
     consumer.set_delegate({
@@ -169,9 +169,8 @@ pub fn to_rule_set(rules: &ReqRuleSet) -> RuleSet {
 fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
     let mut engine = to_engine(&game_msg.ai_type);
     let board_definition = to_board_definition(&game_msg.ruleset);
-    let sizes = get_ship_sizes(to_rule_set(&game_msg.ruleset));
     let ships: Vec<ShipMsg> = engine
-        .place_ships(&board_definition, sizes)
+        .place_ships(&board_definition)
         .iter()
         .map(|ship| 
              ShipMsg {
@@ -197,7 +196,7 @@ fn process_placement_event(game_msg: &AIMessage) -> EnginePlacementEvent {
 }
 
 fn process_move_event(game_msg: &AIMessage) -> EngineAIEvent {
-    let board = BoardState::of(&game_msg.game_state, vec![], true);
+    let board = BoardState::of(&game_msg.game_state, vec![], true); // TODO
     let mut engine = to_engine(&game_msg.ai_type);
     let mv = engine.get_shot(&board);
     EngineAIEvent {
