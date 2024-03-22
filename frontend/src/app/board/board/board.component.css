@@ -4,8 +4,8 @@
     align-items: center;
     flex-direction: row;
     gap: 30px;
-    height: 100vh;
     margin: 0;
+    flex-grow: 1;
 }
 
 .board {
