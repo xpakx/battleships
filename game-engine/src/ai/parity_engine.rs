@@ -93,7 +93,7 @@ impl Engine for ParityEngine {
 
         // exploration
         let mut empty_positions = Vec::new();
-        let shortest_ship = board.definition.sizes.iter().min().unwrap().to_owned(); // TODO: only remaining ships
+        let shortest_ship = board.remaining_ships.iter().min().unwrap().to_owned();
 
         for (x, row) in board.board.iter().enumerate() {
             for (y, field) in row.iter().enumerate() {

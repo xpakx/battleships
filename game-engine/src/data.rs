@@ -1,3 +1,5 @@
+use crate::{RuleSet, get_board_definition};
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Pos {
     pub x: usize,
@@ -39,13 +41,9 @@ pub enum Orientation {
 }
 
 impl BoardState {
-    pub fn of(board_str: &String, ships: Vec<usize>, adjacent: bool) -> BoardState {
+    pub fn of(board_str: &String, ships: Vec<usize>, rules: RuleSet) -> BoardState {
         let mut board = vec![];
-        let mut height = 0;
-        let mut width = 0;
         for line in board_str.split('|') {
-            height += 1;
-            width = line.len();
             let mut row = vec![];
             for ch in line.chars() {
                 let field = match ch {
@@ -59,8 +57,8 @@ impl BoardState {
             board.push(row);
         }
         BoardState {
-            remaining_ships: ships.clone(),
-            definition: BoardDefinition { width, height, adjacent_ships_allowed: adjacent, sizes: ships },
+            remaining_ships: ships,
+            definition: get_board_definition(rules),
             board,
         }
     }

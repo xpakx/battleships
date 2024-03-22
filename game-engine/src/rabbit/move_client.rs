@@ -98,7 +98,7 @@ impl Default for EngineEvent {
 }
 
 fn process_move_event(game_msg: &MoveMessage) -> EngineEvent {
-    let mut board = BoardState::of(&game_msg.game_state, vec![], true);
+    let mut board = BoardState::of(&game_msg.game_state, vec![], to_rule_set(&game_msg.ruleset));
     let ships: Vec<ShipMsg> = match serde_json::from_str(&game_msg.targets) {
         Ok(ships) => ships,
         Err(_) => {
