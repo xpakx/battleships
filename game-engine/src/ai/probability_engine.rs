@@ -162,7 +162,7 @@ fn get_ship_positions(size: &usize, x: usize, y: usize, dir: Orientation, board:
             if x+size > board.len() {
                 return fields
             }
-            for i in x..(x+size-1) {
+            for i in x..(x+size) {
                 fields.push(Position { pos: Pos { x: i, y }, field_type: board[i][y] });
             }
             fields
@@ -172,7 +172,7 @@ fn get_ship_positions(size: &usize, x: usize, y: usize, dir: Orientation, board:
             if y+size > board[x].len() {
                 return fields
             }
-            for i in y..(y+size-1) {
+            for i in y..(y+size) {
                 fields.push(Position { pos: Pos { x, y: i }, field_type: board[x][i] });
             }
             fields
