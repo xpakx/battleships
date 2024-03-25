@@ -117,31 +117,44 @@ fn place_ship(size: &usize, density: &Vec<Vec<usize>>, board: &Vec<Vec<FieldType
     for i in 0..board.len() {
         for j in 0..(board[i].len()-size) {
             let positions = get_ship_positions(size, i, j, Orientation::Vertical, board);
-            let is_free = positions.iter().all(|pos| {
-                match pos.field_type {
-                    FieldType::Obstacle => false,
-                    _ => true,
-                }
-            });
-            if is_free {
-                let is_bonus = positions.iter().all(|pos| {
-                    match pos.field_type {
-                        FieldType::Bonus => true,
-                        _ => false,
-                    }
-                });
-
-                for pos in positions {
-                    let to_add = match is_bonus {
-                        true => 20,
-                        false => 1,
-                    };
-                    density[pos.pos.x][pos.pos.y] += to_add;
-                }
-            }
+            update_density(&mut density, &positions);
         }
     }
     return density;
+}
+
+fn update_density(density: &mut Vec<Vec<usize>>, positions: &Vec<Position>) {
+    if is_free(positions) {
+        let to_add = get_new_density(positions);
+        for pos in positions {
+            density[pos.pos.x][pos.pos.y] += to_add;
+        }
+    }
+}
+
+fn is_free(positions: &Vec<Position>) -> bool {
+    positions.iter().all(|pos| {
+        match pos.field_type {
+            FieldType::Obstacle => false,
+            _ => true,
+        }
+    })
+}
+
+fn has_bonus(positions: &Vec<Position>) -> bool {
+    positions.iter().all(|pos| {
+        match pos.field_type {
+            FieldType::Bonus => true,
+            _ => false,
+        }
+    })
+}
+
+fn get_new_density(positions: &Vec<Position>) -> usize {
+    match has_bonus(positions) {
+        true => 20,
+        false => 1,
+    }
 }
 
 fn get_ship_positions(size: &usize, x: usize, y: usize, dir: Orientation, board: &Vec<Vec<FieldType>>) -> Vec<Position> {
