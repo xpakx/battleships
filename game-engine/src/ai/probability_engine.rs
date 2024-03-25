@@ -111,13 +111,11 @@ struct Position {
 }
 
 fn place_ship(size: &usize, density: &Vec<Vec<usize>>, board: &Vec<Vec<FieldType>>) -> Vec<Vec<usize>> {
-    // TODO
-    // Vertical
     let mut density: Vec<Vec<usize>> = density.clone();
     for i in 0..board.len() {
-        for j in 0..(board[i].len()-size) {
-            let positions = get_ship_positions(size, i, j, Orientation::Vertical, board);
-            update_density(&mut density, &positions);
+        for j in 0..(board[i].len()) {
+            update_density(&mut density, &get_ship_positions(size, i, j, Orientation::Vertical, board));
+            update_density(&mut density, &get_ship_positions(size, i, j, Orientation::Horizontal, board));
         }
     }
     return density;
