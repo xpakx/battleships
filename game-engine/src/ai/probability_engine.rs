@@ -179,3 +179,34 @@ fn get_ship_positions(size: &usize, x: usize, y: usize, dir: Orientation, board:
         },
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_place_ship() {
+        let board: Vec<Vec<FieldType>> = vec![
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+        ];
+        let density: Vec<Vec<usize>> = vec![
+            vec![0, 0, 0],
+            vec![0, 0, 0],
+            vec![0, 0, 0],
+        ];
+
+        let density_with_ship = place_ship(&2, &density, &board);
+
+        assert_eq!(density_with_ship[0][0], 2);
+        assert_eq!(density_with_ship[0][1], 3);
+        assert_eq!(density_with_ship[0][2], 2);
+        assert_eq!(density_with_ship[1][0], 3);
+        assert_eq!(density_with_ship[1][1], 4);
+        assert_eq!(density_with_ship[1][2], 3);
+        assert_eq!(density_with_ship[2][0], 2);
+        assert_eq!(density_with_ship[2][1], 3);
+        assert_eq!(density_with_ship[2][2], 2);
+    }
+}
