@@ -97,13 +97,74 @@ impl Engine for ProbabilityDensityEngine {
     }
 }
 
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum FieldType {
     Free,
     Bonus,
     Obstacle,
 }
 
-fn place_ship(_size: &usize, density: &Vec<Vec<usize>>, _board: &Vec<Vec<FieldType>>) -> Vec<Vec<usize>> {
+struct Position {
+    pos: Pos,
+    field_type: FieldType,
+}
+
+fn place_ship(size: &usize, density: &Vec<Vec<usize>>, board: &Vec<Vec<FieldType>>) -> Vec<Vec<usize>> {
     // TODO
-    return density.clone();
+    // Vertical
+    let mut density: Vec<Vec<usize>> = density.clone();
+    for i in 0..board.len() {
+        for j in 0..(board[i].len()-size) {
+            let positions = get_ship_positions(size, i, j, Orientation::Vertical, board);
+            let is_free = positions.iter().all(|pos| {
+                match pos.field_type {
+                    FieldType::Obstacle => false,
+                    _ => true,
+                }
+            });
+            if is_free {
+                let is_bonus = positions.iter().all(|pos| {
+                    match pos.field_type {
+                        FieldType::Bonus => true,
+                        _ => false,
+                    }
+                });
+
+                for pos in positions {
+                    let to_add = match is_bonus {
+                        true => 20,
+                        false => 1,
+                    };
+                    density[pos.pos.x][pos.pos.y] += to_add;
+                }
+            }
+        }
+    }
+    return density;
+}
+
+fn get_ship_positions(size: &usize, x: usize, y: usize, dir: Orientation, board: &Vec<Vec<FieldType>>) -> Vec<Position> {
+    match dir {
+        Orientation::Vertical => {
+            let mut fields: Vec<Position> = vec![];
+            if x+size > board.len() {
+                return fields
+            }
+            for i in x..(x+size-1) {
+                fields.push(Position { pos: Pos { x: i, y }, field_type: board[i][y] });
+            }
+            fields
+        },
+        Orientation::Horizontal => {
+            let mut fields: Vec<Position> = vec![];
+            if y+size > board[x].len() {
+                return fields
+            }
+            for i in y..(y+size-1) {
+                fields.push(Position { pos: Pos { x, y: i }, field_type: board[x][i] });
+            }
+            fields
+        },
+    }
 }
