@@ -156,7 +156,7 @@ mod tests {
 
     #[test]
     fn test_detecting_intersecting_ends() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 1, y: 1}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 0, y: 2}, size: 2, orientation: Orientation::Vertical},
@@ -167,7 +167,7 @@ mod tests {
 
     #[test]
     fn test_detecting_intersecting_ships() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 1, y: 1}, size: 3, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 0, y: 2}, size: 3, orientation: Orientation::Vertical},
@@ -178,7 +178,7 @@ mod tests {
 
     #[test]
     fn test_detecting_duplicated_ships() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 1, y: 1}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 1, y: 1}, size: 2, orientation: Orientation::Horizontal},
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn test_accepting_correct_placement() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: true, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 1, y: 1}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 2, y: 2}, size: 2, orientation: Orientation::Horizontal},
@@ -200,7 +200,7 @@ mod tests {
 
     #[test]
     fn test_detecting_adjacent_ships() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 1, y: 1}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 1, y: 3}, size: 2, orientation: Orientation::Vertical},
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn test_detecting_adjacent_ships_2() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 0, y: 0}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 1, y: 1}, size: 2, orientation: Orientation::Vertical},
@@ -222,7 +222,7 @@ mod tests {
 
     #[test]
     fn test_detecting_adjacent_ships_corner() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 0, y: 0}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 1, y: 2}, size: 2, orientation: Orientation::Vertical},
@@ -233,7 +233,7 @@ mod tests {
 
     #[test]
     fn test_accepting_correct_placement_without_adjacent_ships() {
-        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false};
+        let board = BoardDefinition {width: 4, height: 4, adjacent_ships_allowed: false, sizes: vec![]};
         let ships = vec![
             Ship {head: Pos {x: 0, y: 0}, size: 2, orientation: Orientation::Horizontal},
             Ship {head: Pos {x: 3, y: 0}, size: 2, orientation: Orientation::Horizontal},
@@ -244,7 +244,7 @@ mod tests {
     
     #[test]
     fn test_check_ships_are_on_board() {
-        let board = BoardDefinition { width: 5, height: 5, adjacent_ships_allowed: true };
+        let board = BoardDefinition { width: 5, height: 5, adjacent_ships_allowed: true, sizes: vec![] };
         let ships = vec![
             Ship { head: Pos { x: 1, y: 1 }, size: 2, orientation: Orientation::Horizontal },
             Ship { head: Pos { x: 0, y: 2 }, size: 2, orientation: Orientation::Vertical },
@@ -254,7 +254,7 @@ mod tests {
         
     #[test]
     fn test_check_ships_partially_outside_are_on_board() {
-        let board = BoardDefinition { width: 4, height: 4, adjacent_ships_allowed: true };
+        let board = BoardDefinition { width: 4, height: 4, adjacent_ships_allowed: true, sizes: vec![] };
         let ships = vec![
             Ship { head: Pos { x: 3, y: 2 }, size: 3, orientation: Orientation::Horizontal },
         ];
@@ -263,7 +263,7 @@ mod tests {
         
     #[test]
     fn test_check_ships_completelly_outside_are_on_board() {
-        let board = BoardDefinition { width: 3, height: 3, adjacent_ships_allowed: true };
+        let board = BoardDefinition { width: 3, height: 3, adjacent_ships_allowed: true, sizes: vec![] };
         let ships = vec![
             Ship { head: Pos { x: 3, y: 1 }, size: 2, orientation: Orientation::Vertical },
         ];
