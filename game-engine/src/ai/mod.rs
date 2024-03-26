@@ -14,6 +14,7 @@ pub enum EngineType {
     Random,
     Greedy,
     Parity,
+    Probability,
 }
 
 pub fn get_engine(engine: EngineType) -> Box<dyn Engine> {
@@ -21,5 +22,6 @@ pub fn get_engine(engine: EngineType) -> Box<dyn Engine> {
         EngineType::Random => Box::new(random_engine::RandomEngine::new()),
         EngineType::Greedy => Box::new(greedy_engine::GreedyEngine::new()),
         EngineType::Parity => Box::new(parity_engine::ParityEngine::new()),
+        EngineType::Probability => Box::new(probability_engine::ProbabilityDensityEngine::new()),
     }
 }

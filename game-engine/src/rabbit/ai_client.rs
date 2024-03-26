@@ -91,6 +91,7 @@ pub enum AIType {
     Random,
     Greedy,
     Parity,
+    Probability,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -150,6 +151,7 @@ fn to_engine(ai_type: &AIType) -> Box<dyn Engine> {
         AIType::Random => get_engine(EngineType::Random),
         AIType::Greedy => get_engine(EngineType::Greedy),
         AIType::Parity => get_engine(EngineType::Parity),
+        AIType::Probability => get_engine(EngineType::Probability),
     }
 }
 
