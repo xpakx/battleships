@@ -142,7 +142,7 @@ fn is_free(positions: &Vec<Position>) -> bool {
 }
 
 fn has_bonus(positions: &Vec<Position>) -> bool {
-    positions.iter().all(|pos| {
+    positions.iter().any(|pos| {
         match pos.field_type {
             FieldType::Bonus => true,
             _ => false,
