@@ -182,6 +182,8 @@ fn get_ship_positions(size: &usize, x: usize, y: usize, dir: Orientation, board:
 
 #[cfg(test)]
 mod tests {
+    use crate::data::{Pos, Orientation};
+
     use super::*;
 
     #[test]
@@ -209,4 +211,56 @@ mod tests {
         assert_eq!(density_with_ship[2][1], 3);
         assert_eq!(density_with_ship[2][2], 2);
     }
+
+    #[test]
+    fn test_update_density() {
+        let mut density: Vec<Vec<usize>> = vec![
+            vec![0, 0, 0],
+            vec![0, 0, 0],
+            vec![0, 0, 0],
+        ];
+            let positions = vec![
+                Position { pos: Pos { x: 0, y: 0 }, field_type: FieldType::Free },
+                Position { pos: Pos { x: 0, y: 1 }, field_type: FieldType::Free },
+            ];
+
+            update_density(&mut density, &positions);
+
+            assert_eq!(density[0][0], 1);
+            assert_eq!(density[0][1], 1);
+    }
+
+    #[test]
+    fn test_get_new_density() {
+        let positions_with_bonus = vec![
+            Position { pos: Pos { x: 0, y: 0 }, field_type: FieldType::Bonus },
+            Position { pos: Pos { x: 0, y: 1 }, field_type: FieldType::Bonus },
+        ];
+        let positions_without_bonus = vec![
+            Position { pos: Pos { x: 0, y: 0 }, field_type: FieldType::Free },
+            Position { pos: Pos { x: 0, y: 1 }, field_type: FieldType::Free },
+        ];
+
+        let density_with_bonus = get_new_density(&positions_with_bonus);
+        let density_without_bonus = get_new_density(&positions_without_bonus);
+
+        assert_eq!(density_with_bonus, 20);
+        assert_eq!(density_without_bonus, 1);
+    }
+
+
+    #[test]
+fn test_get_ship_positions() {
+    let board: Vec<Vec<FieldType>> = vec![
+        vec![FieldType::Free, FieldType::Free, FieldType::Free],
+        vec![FieldType::Free, FieldType::Free, FieldType::Free],
+        vec![FieldType::Free, FieldType::Free, FieldType::Free],
+    ];
+
+    let positions_vertical = get_ship_positions(&2, 0, 0, Orientation::Vertical, &board);
+    let positions_horizontal = get_ship_positions(&2, 0, 0, Orientation::Horizontal, &board);
+
+    assert_eq!(positions_vertical.len(), 2);
+    assert_eq!(positions_horizontal.len(), 2);
+}
 }
