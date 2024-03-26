@@ -18,7 +18,7 @@ impl ProbabilityDensityEngine {
 
 impl Engine for ProbabilityDensityEngine {
     fn get_name(&self) -> String {
-        String::from("Parity Engine")
+        String::from("Probability Density Engine")
     }
 
     fn place_ships(&mut self, board: &BoardDefinition) -> Vec<Ship> {
@@ -250,19 +250,44 @@ mod tests {
         assert_eq!(density_without_bonus, 1);
     }
 
+    #[test]
+    fn test_get_ship_positions() {
+        let board: Vec<Vec<FieldType>> = vec![
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+        ];
+
+        let positions_vertical = get_ship_positions(&2, 0, 0, Orientation::Vertical, &board);
+        let positions_horizontal = get_ship_positions(&2, 0, 0, Orientation::Horizontal, &board);
+
+        assert_eq!(positions_vertical.len(), 2);
+        assert_eq!(positions_horizontal.len(), 2);
+    }
 
     #[test]
-fn test_get_ship_positions() {
-    let board: Vec<Vec<FieldType>> = vec![
-        vec![FieldType::Free, FieldType::Free, FieldType::Free],
-        vec![FieldType::Free, FieldType::Free, FieldType::Free],
-        vec![FieldType::Free, FieldType::Free, FieldType::Free],
-    ];
+    fn test_place_ship_with_bonus() {
+        let board: Vec<Vec<FieldType>> = vec![
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+            vec![FieldType::Bonus, FieldType::Free, FieldType::Free],
+            vec![FieldType::Free, FieldType::Free, FieldType::Free],
+        ];
+        let density: Vec<Vec<usize>> = vec![
+            vec![0, 0, 0],
+            vec![0, 0, 0],
+            vec![0, 0, 0],
+        ];
 
-    let positions_vertical = get_ship_positions(&2, 0, 0, Orientation::Vertical, &board);
-    let positions_horizontal = get_ship_positions(&2, 0, 0, Orientation::Horizontal, &board);
+        let density_with_ship = place_ship(&2, &density, &board);
 
-    assert_eq!(positions_vertical.len(), 2);
-    assert_eq!(positions_horizontal.len(), 2);
-}
+        assert_eq!(density_with_ship[0][0], 21);
+        assert_eq!(density_with_ship[0][1], 3);
+        assert_eq!(density_with_ship[0][2], 2);
+        assert_eq!(density_with_ship[1][0], 0);
+        assert_eq!(density_with_ship[1][1], 23);
+        assert_eq!(density_with_ship[1][2], 3);
+        assert_eq!(density_with_ship[2][0], 21);
+        assert_eq!(density_with_ship[2][1], 3);
+        assert_eq!(density_with_ship[2][2], 2);
+    }
 }
