@@ -4,5 +4,6 @@ public enum AIType {
     Random,
     Greedy,
     Parity,
+    Probability,
     None;
 }

@@ -9,6 +9,7 @@ public enum AIType {
     Random("Random"),
     Greedy("Greedy"),
     Parity("Parity"),
+    Probability("Probability"),
     None("None") ;
 
     private final String type;
