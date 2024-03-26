@@ -125,7 +125,9 @@ fn update_density(density: &mut Vec<Vec<usize>>, positions: &Vec<Position>) {
     if is_free(positions) {
         let to_add = get_new_density(positions);
         for pos in positions {
-            density[pos.pos.x][pos.pos.y] += to_add;
+            if pos.field_type == FieldType::Free {
+                density[pos.pos.x][pos.pos.y] += to_add;
+            } 
         }
     }
 }
