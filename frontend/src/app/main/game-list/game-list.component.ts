@@ -42,7 +42,7 @@ export class GameListComponent implements OnInit {
   }
 
   onReject(gameId: number) {
-    // todo
+    this.games = this.games.filter((game) => game.id != gameId);
   }
 
   onError(err: HttpErrorResponse) {

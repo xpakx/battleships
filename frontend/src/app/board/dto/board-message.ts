@@ -9,8 +9,4 @@ export interface BoardMessage {
     gameStarted: boolean;
 
     error?: String;
-
-    // TODO
-    // lastMoveX: number;
-    // lastMoveY: number;
 }
