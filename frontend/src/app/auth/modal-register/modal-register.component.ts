@@ -51,6 +51,7 @@ export class ModalRegisterComponent implements OnInit {
   onRegister(response: AuthResponse) {
     this.error = false;
     localStorage.setItem('token', response.token.toString());
+    localStorage.setItem('refresh', response.refresh_token.toString());
     localStorage.setItem('username', response.username.toString());
   }
 
