@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class JwtUtils {
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 10 * 60;
+    public static final long JWT_REFRESH_TOKEN_VALIDITY = 30 * 24 * 60 * 60;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -28,21 +29,22 @@ public class JwtUtils {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList())
         );
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(claims, userDetails.getUsername(), JWT_TOKEN_VALIDITY);
     }
 
     public String generateRefreshToken(String username) {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("refresh", true);
-        return doGenerateToken(claims, username);
+        return doGenerateToken(claims, username, JWT_REFRESH_TOKEN_VALIDITY);
     }
 
-    private String doGenerateToken(Claims claims, String subject) {
+    private String doGenerateToken(Claims claims, String subject, long validity) {
+        var validityInMilliSeconds = validity * 1000;
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+                .setExpiration(new Date(System.currentTimeMillis() + validityInMilliSeconds))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
