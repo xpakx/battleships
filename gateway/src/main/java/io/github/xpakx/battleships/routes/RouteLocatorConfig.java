@@ -20,7 +20,7 @@ public class RouteLocatorConfig {
             ) {
         return builder.routes()
                 .route("main", r -> r
-                        .path("/authenticate", "/register", "/game/**")
+                        .path("/authenticate", "/register", "/refresh", "/game/**")
                         .filters(f -> f.filter(dedupeResponseHeaderFilter))
                         .uri(mainUrl))
                 .route("game", r -> r
