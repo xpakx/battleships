@@ -3,19 +3,24 @@ package io.github.xpakx.battleships.user;
 import io.github.xpakx.battleships.security.JwtUtils;
 import io.github.xpakx.battleships.user.dto.AuthenticationRequest;
 import io.github.xpakx.battleships.user.dto.AuthenticationResponse;
+import io.github.xpakx.battleships.user.dto.RefreshTokenRequest;
 import io.github.xpakx.battleships.user.dto.RegistrationRequest;
 import io.github.xpakx.battleships.user.error.AuthenticationException;
 import io.github.xpakx.battleships.user.error.ValidationException;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -26,6 +31,7 @@ public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwt;
 
     public AuthenticationResponse register(RegistrationRequest request) {
         testRequest(request);
@@ -75,6 +81,32 @@ public class AuthService {
                 .token(token)
                 .refresh_token(refreshToken)
                 .username(authenticationRequest.getUsername())
+                .moderator_role(
+                        userDetails.getAuthorities().stream()
+                                .anyMatch((a) -> a.getAuthority().equals("MODERATOR"))
+                )
+                .build();
+    }
+
+    public AuthenticationResponse refresh(RefreshTokenRequest request) {
+        if(jwt.isInvalid(request.getToken())) {
+            return null;
+        }
+        Claims claims = jwt.getAllClaimsFromToken(request.getToken());
+        Boolean isRefreshToken = claims.get("refresh", Boolean.class);
+        if (Boolean.FALSE.equals(isRefreshToken)) {
+            return null;
+        }
+
+        var username = claims.getSubject();
+        final UserDetails userDetails = userService.loadUserByUsername(username);
+
+        final String token = jwtUtils.generateToken(userDetails);
+        final String refreshToken = jwtUtils.generateRefreshToken(username);
+        return AuthenticationResponse.builder()
+                .token(token)
+                .refresh_token(refreshToken)
+                .username(username)
                 .moderator_role(
                         userDetails.getAuthorities().stream()
                                 .anyMatch((a) -> a.getAuthority().equals("MODERATOR"))

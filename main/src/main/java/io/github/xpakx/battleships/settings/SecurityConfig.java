@@ -53,6 +53,7 @@ public class SecurityConfig {
                         (auth) -> auth
                                 .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/register").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/refresh").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(

@@ -2,6 +2,7 @@ package io.github.xpakx.battleships.user;
 
 import io.github.xpakx.battleships.user.dto.AuthenticationRequest;
 import io.github.xpakx.battleships.user.dto.AuthenticationResponse;
+import io.github.xpakx.battleships.user.dto.RefreshTokenRequest;
 import io.github.xpakx.battleships.user.dto.RegistrationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,14 @@ public class AuthController {
         return new ResponseEntity<>(
                 service.register(registrationRequest),
                 HttpStatus.CREATED
+        );
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(
+                service.refresh(request)
         );
     }
 }
