@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public class AuthenticationResponse {
     private String token;
+    private String refresh_token;
     private String username;
     private boolean moderator_role;
 }

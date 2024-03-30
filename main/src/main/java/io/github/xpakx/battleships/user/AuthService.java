@@ -32,8 +32,10 @@ public class AuthService {
         User user = createNewUser(request);
         authenticate(request.getUsername(), request.getPassword());
         final String token = jwtUtils.generateToken(userService.userAccountToUserDetails(user));
+        final String refreshToken = jwtUtils.generateRefreshToken(request.getUsername());
         return AuthenticationResponse.builder()
                 .token(token)
+                .refresh_token(refreshToken)
                 .username(user.getUsername())
                 .moderator_role(false)
                 .build();
@@ -68,8 +70,10 @@ public class AuthService {
         final UserDetails userDetails = userService.loadUserByUsername(authenticationRequest.getUsername());
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final String token = jwtUtils.generateToken(userDetails);
+        final String refreshToken = jwtUtils.generateRefreshToken(authenticationRequest.getUsername());
         return AuthenticationResponse.builder()
                 .token(token)
+                .refresh_token(refreshToken)
                 .username(authenticationRequest.getUsername())
                 .moderator_role(
                         userDetails.getAuthorities().stream()

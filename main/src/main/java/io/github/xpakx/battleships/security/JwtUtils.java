@@ -31,6 +31,12 @@ public class JwtUtils {
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
+    public String generateRefreshToken(String username) {
+        Claims claims = Jwts.claims().setSubject(username);
+        claims.put("refresh", true);
+        return doGenerateToken(claims, username);
+    }
+
     private String doGenerateToken(Claims claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
